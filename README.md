@@ -29,3 +29,4 @@ The concrete syntax of PTLTL is described in `code/ptltl/chars.lex` and `code/pt
 The abstract syntax of PTLTL is in  `code/ptltl/tree-lang/tree.sml` in the datatype called `formula`.
 Implementation of the verify functionality is in `code/ptltl/tree-lang/tree.sml` in the function called `verify`.
 Implementation of the synthesis of the DFA is in `code/ptltl/tree-lang/tree.sml` in the function called `to_dfa`.
+The DFA synthesis is based on Havelund/Rosu's ["Synthesizing Monitors for Safety Properties"](https://ti.arc.nasa.gov/m/pub-archive/345h/0345%20(Havelund).pdf)
