@@ -1,0 +1,563 @@
+
+state 0:
+
+	tree_nt : . form_nt 
+
+	TRUE	shift 11
+	FALSE	shift 10
+	ALWAYS	shift 9
+	ONCE	shift 8
+	PREV	shift 7
+	START	shift 6
+	END	shift 5
+	TILDE	shift 4
+	LPAREN	shift 3
+	ID	shift 2
+
+	tree_nt	goto 32
+	form_nt	goto 1
+
+	.	error
+
+
+state 1:
+
+	tree_nt : form_nt .  (reduce by rule 0)
+	form_nt : form_nt . LONGARROW form_nt 
+	form_nt : form_nt . DARROW form_nt 
+	form_nt : form_nt . VEE form_nt 
+	form_nt : form_nt . DPLUS form_nt 
+	form_nt : form_nt . WEDGE form_nt 
+	form_nt : form_nt . SINCE form_nt 
+
+	LONGARROW	shift 17
+	DARROW	shift 16
+	VEE	shift 15
+	DPLUS	shift 14
+	WEDGE	shift 13
+	SINCE	shift 12
+
+
+	.	reduce by rule 0
+
+
+state 2:
+
+	form_nt : ID .  (reduce by rule 1)
+
+
+
+	.	reduce by rule 1
+
+
+state 3:
+
+	form_nt : LPAREN . form_nt RPAREN 
+
+	TRUE	shift 11
+	FALSE	shift 10
+	ALWAYS	shift 9
+	ONCE	shift 8
+	PREV	shift 7
+	START	shift 6
+	END	shift 5
+	TILDE	shift 4
+	LPAREN	shift 3
+	ID	shift 2
+
+	form_nt	goto 18
+
+	.	error
+
+
+state 4:
+
+	form_nt : TILDE . form_nt 
+
+	TRUE	shift 11
+	FALSE	shift 10
+	ALWAYS	shift 9
+	ONCE	shift 8
+	PREV	shift 7
+	START	shift 6
+	END	shift 5
+	TILDE	shift 4
+	LPAREN	shift 3
+	ID	shift 2
+
+	form_nt	goto 19
+
+	.	error
+
+
+state 5:
+
+	form_nt : END . form_nt 
+
+	TRUE	shift 11
+	FALSE	shift 10
+	ALWAYS	shift 9
+	ONCE	shift 8
+	PREV	shift 7
+	START	shift 6
+	END	shift 5
+	TILDE	shift 4
+	LPAREN	shift 3
+	ID	shift 2
+
+	form_nt	goto 20
+
+	.	error
+
+
+state 6:
+
+	form_nt : START . form_nt 
+
+	TRUE	shift 11
+	FALSE	shift 10
+	ALWAYS	shift 9
+	ONCE	shift 8
+	PREV	shift 7
+	START	shift 6
+	END	shift 5
+	TILDE	shift 4
+	LPAREN	shift 3
+	ID	shift 2
+
+	form_nt	goto 21
+
+	.	error
+
+
+state 7:
+
+	form_nt : PREV . form_nt 
+
+	TRUE	shift 11
+	FALSE	shift 10
+	ALWAYS	shift 9
+	ONCE	shift 8
+	PREV	shift 7
+	START	shift 6
+	END	shift 5
+	TILDE	shift 4
+	LPAREN	shift 3
+	ID	shift 2
+
+	form_nt	goto 22
+
+	.	error
+
+
+state 8:
+
+	form_nt : ONCE . form_nt 
+
+	TRUE	shift 11
+	FALSE	shift 10
+	ALWAYS	shift 9
+	ONCE	shift 8
+	PREV	shift 7
+	START	shift 6
+	END	shift 5
+	TILDE	shift 4
+	LPAREN	shift 3
+	ID	shift 2
+
+	form_nt	goto 23
+
+	.	error
+
+
+state 9:
+
+	form_nt : ALWAYS . form_nt 
+
+	TRUE	shift 11
+	FALSE	shift 10
+	ALWAYS	shift 9
+	ONCE	shift 8
+	PREV	shift 7
+	START	shift 6
+	END	shift 5
+	TILDE	shift 4
+	LPAREN	shift 3
+	ID	shift 2
+
+	form_nt	goto 24
+
+	.	error
+
+
+state 10:
+
+	form_nt : FALSE .  (reduce by rule 3)
+
+
+
+	.	reduce by rule 3
+
+
+state 11:
+
+	form_nt : TRUE .  (reduce by rule 2)
+
+
+
+	.	reduce by rule 2
+
+
+state 12:
+
+	form_nt : form_nt SINCE . form_nt 
+
+	TRUE	shift 11
+	FALSE	shift 10
+	ALWAYS	shift 9
+	ONCE	shift 8
+	PREV	shift 7
+	START	shift 6
+	END	shift 5
+	TILDE	shift 4
+	LPAREN	shift 3
+	ID	shift 2
+
+	form_nt	goto 25
+
+	.	error
+
+
+state 13:
+
+	form_nt : form_nt WEDGE . form_nt 
+
+	TRUE	shift 11
+	FALSE	shift 10
+	ALWAYS	shift 9
+	ONCE	shift 8
+	PREV	shift 7
+	START	shift 6
+	END	shift 5
+	TILDE	shift 4
+	LPAREN	shift 3
+	ID	shift 2
+
+	form_nt	goto 26
+
+	.	error
+
+
+state 14:
+
+	form_nt : form_nt DPLUS . form_nt 
+
+	TRUE	shift 11
+	FALSE	shift 10
+	ALWAYS	shift 9
+	ONCE	shift 8
+	PREV	shift 7
+	START	shift 6
+	END	shift 5
+	TILDE	shift 4
+	LPAREN	shift 3
+	ID	shift 2
+
+	form_nt	goto 27
+
+	.	error
+
+
+state 15:
+
+	form_nt : form_nt VEE . form_nt 
+
+	TRUE	shift 11
+	FALSE	shift 10
+	ALWAYS	shift 9
+	ONCE	shift 8
+	PREV	shift 7
+	START	shift 6
+	END	shift 5
+	TILDE	shift 4
+	LPAREN	shift 3
+	ID	shift 2
+
+	form_nt	goto 28
+
+	.	error
+
+
+state 16:
+
+	form_nt : form_nt DARROW . form_nt 
+
+	TRUE	shift 11
+	FALSE	shift 10
+	ALWAYS	shift 9
+	ONCE	shift 8
+	PREV	shift 7
+	START	shift 6
+	END	shift 5
+	TILDE	shift 4
+	LPAREN	shift 3
+	ID	shift 2
+
+	form_nt	goto 29
+
+	.	error
+
+
+state 17:
+
+	form_nt : form_nt LONGARROW . form_nt 
+
+	TRUE	shift 11
+	FALSE	shift 10
+	ALWAYS	shift 9
+	ONCE	shift 8
+	PREV	shift 7
+	START	shift 6
+	END	shift 5
+	TILDE	shift 4
+	LPAREN	shift 3
+	ID	shift 2
+
+	form_nt	goto 30
+
+	.	error
+
+
+state 18:
+
+	form_nt : form_nt . LONGARROW form_nt 
+	form_nt : form_nt . DARROW form_nt 
+	form_nt : form_nt . VEE form_nt 
+	form_nt : form_nt . DPLUS form_nt 
+	form_nt : form_nt . WEDGE form_nt 
+	form_nt : form_nt . SINCE form_nt 
+	form_nt : LPAREN form_nt . RPAREN 
+
+	LONGARROW	shift 17
+	DARROW	shift 16
+	VEE	shift 15
+	DPLUS	shift 14
+	WEDGE	shift 13
+	SINCE	shift 12
+	RPAREN	shift 31
+
+
+	.	error
+
+
+state 19:
+
+	form_nt : form_nt . LONGARROW form_nt 
+	form_nt : form_nt . DARROW form_nt 
+	form_nt : form_nt . VEE form_nt 
+	form_nt : form_nt . DPLUS form_nt 
+	form_nt : form_nt . WEDGE form_nt 
+	form_nt : form_nt . SINCE form_nt 
+	form_nt : TILDE form_nt .  (reduce by rule 15)
+
+
+
+	.	reduce by rule 15
+
+
+state 20:
+
+	form_nt : form_nt . LONGARROW form_nt 
+	form_nt : form_nt . DARROW form_nt 
+	form_nt : form_nt . VEE form_nt 
+	form_nt : form_nt . DPLUS form_nt 
+	form_nt : form_nt . WEDGE form_nt 
+	form_nt : form_nt . SINCE form_nt 
+	form_nt : END form_nt .  (reduce by rule 14)
+
+
+
+	.	reduce by rule 14
+
+
+state 21:
+
+	form_nt : form_nt . LONGARROW form_nt 
+	form_nt : form_nt . DARROW form_nt 
+	form_nt : form_nt . VEE form_nt 
+	form_nt : form_nt . DPLUS form_nt 
+	form_nt : form_nt . WEDGE form_nt 
+	form_nt : form_nt . SINCE form_nt 
+	form_nt : START form_nt .  (reduce by rule 13)
+
+
+
+	.	reduce by rule 13
+
+
+state 22:
+
+	form_nt : form_nt . LONGARROW form_nt 
+	form_nt : form_nt . DARROW form_nt 
+	form_nt : form_nt . VEE form_nt 
+	form_nt : form_nt . DPLUS form_nt 
+	form_nt : form_nt . WEDGE form_nt 
+	form_nt : form_nt . SINCE form_nt 
+	form_nt : PREV form_nt .  (reduce by rule 12)
+
+
+
+	.	reduce by rule 12
+
+
+state 23:
+
+	form_nt : form_nt . LONGARROW form_nt 
+	form_nt : form_nt . DARROW form_nt 
+	form_nt : form_nt . VEE form_nt 
+	form_nt : form_nt . DPLUS form_nt 
+	form_nt : form_nt . WEDGE form_nt 
+	form_nt : form_nt . SINCE form_nt 
+	form_nt : ONCE form_nt .  (reduce by rule 11)
+
+
+
+	.	reduce by rule 11
+
+
+state 24:
+
+	form_nt : form_nt . LONGARROW form_nt 
+	form_nt : form_nt . DARROW form_nt 
+	form_nt : form_nt . VEE form_nt 
+	form_nt : form_nt . DPLUS form_nt 
+	form_nt : form_nt . WEDGE form_nt 
+	form_nt : form_nt . SINCE form_nt 
+	form_nt : ALWAYS form_nt .  (reduce by rule 10)
+
+
+
+	.	reduce by rule 10
+
+
+state 25:
+
+	form_nt : form_nt . LONGARROW form_nt 
+	form_nt : form_nt . DARROW form_nt 
+	form_nt : form_nt . VEE form_nt 
+	form_nt : form_nt . DPLUS form_nt 
+	form_nt : form_nt . WEDGE form_nt 
+	form_nt : form_nt . SINCE form_nt 
+	form_nt : form_nt SINCE form_nt .  (reduce by rule 9)
+
+	RPAREN	reduce by rule 9
+	EOF	reduce by rule 9
+
+
+	.	error
+
+
+state 26:
+
+	form_nt : form_nt . LONGARROW form_nt 
+	form_nt : form_nt . DARROW form_nt 
+	form_nt : form_nt . VEE form_nt 
+	form_nt : form_nt . DPLUS form_nt 
+	form_nt : form_nt . WEDGE form_nt 
+	form_nt : form_nt WEDGE form_nt .  (reduce by rule 8)
+	form_nt : form_nt . SINCE form_nt 
+
+	RPAREN	reduce by rule 8
+	EOF	reduce by rule 8
+
+
+	.	error
+
+
+state 27:
+
+	form_nt : form_nt . LONGARROW form_nt 
+	form_nt : form_nt . DARROW form_nt 
+	form_nt : form_nt . VEE form_nt 
+	form_nt : form_nt . DPLUS form_nt 
+	form_nt : form_nt DPLUS form_nt .  (reduce by rule 7)
+	form_nt : form_nt . WEDGE form_nt 
+	form_nt : form_nt . SINCE form_nt 
+
+	RPAREN	reduce by rule 7
+	EOF	reduce by rule 7
+
+
+	.	error
+
+
+state 28:
+
+	form_nt : form_nt . LONGARROW form_nt 
+	form_nt : form_nt . DARROW form_nt 
+	form_nt : form_nt . VEE form_nt 
+	form_nt : form_nt VEE form_nt .  (reduce by rule 6)
+	form_nt : form_nt . DPLUS form_nt 
+	form_nt : form_nt . WEDGE form_nt 
+	form_nt : form_nt . SINCE form_nt 
+
+	RPAREN	reduce by rule 6
+	EOF	reduce by rule 6
+
+
+	.	error
+
+
+state 29:
+
+	form_nt : form_nt . LONGARROW form_nt 
+	form_nt : form_nt . DARROW form_nt 
+	form_nt : form_nt DARROW form_nt .  (reduce by rule 5)
+	form_nt : form_nt . VEE form_nt 
+	form_nt : form_nt . DPLUS form_nt 
+	form_nt : form_nt . WEDGE form_nt 
+	form_nt : form_nt . SINCE form_nt 
+
+	RPAREN	reduce by rule 5
+	EOF	reduce by rule 5
+
+
+	.	error
+
+
+state 30:
+
+	form_nt : form_nt . LONGARROW form_nt 
+	form_nt : form_nt LONGARROW form_nt .  (reduce by rule 4)
+	form_nt : form_nt . DARROW form_nt 
+	form_nt : form_nt . VEE form_nt 
+	form_nt : form_nt . DPLUS form_nt 
+	form_nt : form_nt . WEDGE form_nt 
+	form_nt : form_nt . SINCE form_nt 
+
+	RPAREN	reduce by rule 4
+	EOF	reduce by rule 4
+
+
+	.	error
+
+
+state 31:
+
+	form_nt : LPAREN form_nt RPAREN .  (reduce by rule 16)
+
+
+
+	.	reduce by rule 16
+
+
+state 32:
+
+
+	EOF	accept
+
+
+	.	error
+
+36 of 199 action table entries left after compaction
+15 goto table entries

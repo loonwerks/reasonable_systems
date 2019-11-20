@@ -1,0 +1,3 @@
+
+
+always (b --> prev (~b since a))
