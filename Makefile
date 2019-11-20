@@ -7,7 +7,7 @@ code/ptltl/chars-lang/chars.lex.sml:
 	mllex code/ptltl/chars-lang/chars.lex
 
 code/ptltl/tokens-lang/tokens.yacc.sig code/ptltl/tokens-lang/tokens.yacc.sml:
-	mlyacc code/ptltl/tokens.yacc
+	mlyacc code/ptltl/tokens-lang/tokens.yacc
 
 clean:
 	git clean -Xf; rm -r bin/*

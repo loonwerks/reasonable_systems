@@ -2,4 +2,9 @@
 **/config
 bin
 bin/**
+**.lex.sml
+**.yacc.desc
+**.yacc.sig
+**.yacc.sml
+
 
