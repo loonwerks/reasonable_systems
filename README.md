@@ -1,7 +1,7 @@
 # Reasonable Systems 
 
 This repo holds tools for verifying data, programs, and execution traces 
-against specifications written in various logics, including Past time LTL.
+against specifications written in various logics, including Past Time LTL.
 
 ## Getting Started
 Clone or download the repo.  Let's assume your local copy is in a directory called "verif_tools".  `cd verif_tools` and run `make`.  The built tools will be inside the directory `bin`.  The code is in the directory `code`.  Example specifications are in `specs`.
