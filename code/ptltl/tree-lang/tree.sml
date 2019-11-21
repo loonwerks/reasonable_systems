@@ -270,6 +270,11 @@ structure Tree = struct
         not (state f)
     )
 
+
+    (* the state is represented as a mapping from subformulas to booleans *) 
+      
+    val empty_state = (fn fm => false)
+    
     fun transition_start tk = (List.foldl
       (fn (fm, state_acc) => let
         val decision =
@@ -282,7 +287,7 @@ structure Tree = struct
             (state_acc fm')
         )
       end)
-      (fn fm => false)
+      empty_state 
       (rev subforms)
     )
 
@@ -351,7 +356,7 @@ structure Tree = struct
             (state_acc fm')
         )
       end)
-      (fn fm => false)
+      empty_state
       (rev subforms)
     )
 
