@@ -88,13 +88,37 @@ in
 end
 
 
+fun mk_trace_token tk_str = (let
+  val tk_id_list = (String.split_pattern (tk_str, "(\\.)+"))
+  val tk_fn  = (List.foldl
+    (fn (tk_id, tk_fn_acc) =>
+      (fn id =>
+        (tk_id = id) orelse 
+        (tk_fn_acc id)
+      )
+    )
+    (fn id => false)
+    tk_id_list
+  )
+in
+  tk_fn
+end)
+
+fun mk_trace str = (let
+  val tk_str_list = (String.split_pattern (str, "[ \t\n]+"))
+  val trace = (List.map mk_trace_token tk_str_list)
+in
+  trace
+end)
+
+
 fun verify [filename, trace_str]  = (let
   val inStream = readFile filename
   val tokenStream = CharStream.makeTokenStream (readStream inStream)
   val (form, rem) = TokenStream.parse (15, tokenStream, printError filename)  
   val () = TextIO.closeIn inStream
 
-  val trace = rev (String.split_pattern (trace_str, "[ \t\n]+"))
+  val trace = rev (mk_trace trace_str)
   val answer = (
     if (Tree.verify (trace, form)) then
       "ACCEPTED"
@@ -106,6 +130,7 @@ in
   print (answer ^ "\n")
 end)
 
+
 fun verify_via_dfa [filename, trace_str]  = (let
   val inStream = readFile filename
   val tokenStream = CharStream.makeTokenStream (readStream inStream)
@@ -113,7 +138,7 @@ fun verify_via_dfa [filename, trace_str]  = (let
   val () = TextIO.closeIn inStream
 
   val dfa = Tree.to_dfa form
-  val trace = (String.split_pattern (trace_str, "[ \t\n]+"))
+  val trace = mk_trace trace_str
 
   val answer = (
     if (dfa trace) then

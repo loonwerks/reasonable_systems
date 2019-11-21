@@ -1,1 +1,1 @@
-always (b --> prev (~b since a))
+always ((b --> prev (~b since a)) /\ ~(a /\ b))

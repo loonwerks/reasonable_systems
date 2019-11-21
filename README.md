@@ -15,8 +15,8 @@ The following types of commands are possible for the ptltl program:
 ```bash
 bin/ptltl --lex specs/ptltl/spec_1.pt
 bin/ptltl --parse specs/ptltl/spec_1.pt
-bin/ptltl --verify specs/ptltl/spec_1.pt "a a b a b a a"
-bin/ptltl --dfa specs/ptltl/spec_1.pt "a a b a b a a"
+bin/ptltl --verify specs/ptltl/spec_1.pt "a a b a b a.c a"
+bin/ptltl --dfa specs/ptltl/spec_1.pt "a a b a b.c a a"
 ```
 
 The `--lex` flag generates a list of tokens from the specification.
@@ -24,7 +24,7 @@ The `--parse` flag generates a tree from the specification.
 The `--verify` flag checks the specification against the string of tokens.
 The `--dfa` flag synthesizes a DFA from the specification and runs the DFA on the tokens.
 
-Example specifications are in `specs/ptltl`.
+Example specifications are in `specs/ptltl`.  The tokens are separated by white space.  A token containing words with dots in between means that each word of that token is active simultaneously.  That is, the formula accepts the token if the formula requires a subset of those words.
 The concrete syntax of PTLTL is described in `code/ptltl/chars.lex` and `code/ptltl/tokens.yacc`.
 The abstract syntax of PTLTL is in  `code/ptltl/tree-lang/tree.sml` in the datatype called `formula`.
 Implementation of the verify functionality is in `code/ptltl/tree-lang/tree.sml` in the function called `verify`.

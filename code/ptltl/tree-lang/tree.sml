@@ -19,7 +19,7 @@ structure Tree = struct
     End of formula |
     Not of formula
   
-  val other_token = "_other_"
+  val other_token = (fn id => false) 
 
   fun surround tag body = (let
     val abc = "(" ^ tag
@@ -94,9 +94,11 @@ structure Tree = struct
 
   in
     (case form of
-      Id str => (str = l_now) | 
+      Id str =>
+        (l_now str) | 
 
-      Prim b => b |
+      Prim b =>
+        b |
 
       Imp (f1, f2) =>
         not (verify (trace, f1)) orelse
@@ -226,7 +228,7 @@ structure Tree = struct
     
     fun decide_formula_start (fm, state, tk) = (case fm of
       Id str =>
-        str = tk |
+        (tk str) |
 
       Prim b =>
         b |
@@ -293,7 +295,7 @@ structure Tree = struct
 
     fun decide_formula (fm, state, state_acc, tk) = (case fm of
       Id str =>
-        str = tk |
+        (tk str) |
 
       Prim b =>
         b |
