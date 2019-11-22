@@ -11,7 +11,9 @@ Make sure you have MLton (http://mlton.org/) installed.
 
 
 ### PTLTL
-The following sorts of commands are possible for the `ptltl` program:
+The specification `always ((b --> prev (~b since a)) /\ ~(a /\ b))` is stored in `specs/ptltl/spec_1.pt`.  It says that if there is a `b` then the preceding tokens since an `a` are not `b`s, and their was certainly a preceding `a`.  Additionally, `a` and `b` cannot occur simultaneously.
+
+The following sorts of commands are possible with the `ptltl` program:
 ```bash
 $ bin/ptltl --lex specs/ptltl/spec_1.pt
 1:1 ALWAYS
