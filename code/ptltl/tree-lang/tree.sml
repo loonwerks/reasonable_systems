@@ -19,7 +19,7 @@ structure Tree = struct
     End of formula |
     Not of formula
   
-  val other_token = (fn id => false) 
+  val other_elm = (fn id => false) 
 
   fun surround tag body = (let
     val abc = "(" ^ tag
@@ -86,8 +86,8 @@ structure Tree = struct
     ** val _ = print ("stack: [" ^ (String.concatWith ", " trace) ^ "]\n") 
     *)
 
-    val (l_now, trace_prev) = (case trace of
-      [] => (other_token, []) |
+    val (elm, trace_prev) = (case trace of
+      [] => (other_elm, []) |
       [x] => (x, []) |
       x :: xs => (x, xs)
     )
@@ -95,7 +95,7 @@ structure Tree = struct
   in
     (case form of
       Id str =>
-        (l_now str) | 
+        (elm str) | 
 
       Prim b =>
         b |
@@ -226,9 +226,9 @@ structure Tree = struct
     val subforms = mk_subforms form
     val size = List.length subforms
     
-    fun decide_formula_start (fm, state, tk) = (case fm of
+    fun decide_formula_start (fm, state, elm) = (case fm of
       Id str =>
-        (tk str) |
+        (elm str) |
 
       Prim b =>
         b |
@@ -277,10 +277,10 @@ structure Tree = struct
       
     val empty_state = (fn fm => false)
     
-    fun transition_start tk = (List.foldl
+    fun transition_start elm = (List.foldl
       (fn (fm, state_acc) => let
         val decision =
-          decide_formula_start (fm, state_acc, tk)
+          decide_formula_start (fm, state_acc, elm)
       in
         (fn fm' => 
           if fm = fm' then
@@ -293,9 +293,9 @@ structure Tree = struct
       (rev subforms)
     )
 
-    fun decide_formula (fm, state, state_acc, tk) = (case fm of
+    fun decide_formula (fm, state, state_acc, elm) = (case fm of
       Id str =>
-        (tk str) |
+        (elm str) |
 
       Prim b =>
         b |
@@ -346,10 +346,10 @@ structure Tree = struct
       
     )
 
-    fun transition (state, tk) = (List.foldl
+    fun transition (state, elm) = (List.foldl
       (fn (fm, state_acc) => let
         val decision =
-          decide_formula (fm, state, state_acc, tk)
+          decide_formula (fm, state, state_acc, elm)
       in
         (fn fm' => 
           if fm = fm' then
@@ -369,25 +369,25 @@ structure Tree = struct
 
   fun to_dfa form = (let
     val (transition_start, transition) = mk_transitions form
-  
-    fun dfa tokens = (case tokens of
-      [] =>
-        dfa [other_token] |
-  
-      tk :: tks => (let
-        fun loop (tokens, state) = (case tokens of
-          [] => state form |
-          tk :: tks => (let
-            val state' = transition (state, tk)
-          in
-            (state' form) andalso 
-            loop (tks, state')
-          end)
-        )
+
+    fun loop (elms, state) = (case elms of
+      [] => state form |
+      elm :: elms' => (let
+        val state' = transition (state, elm)
       in
-        loop (tks, transition_start tk)
+        (state' form) andalso 
+        loop (elms, state')
       end)
     )
+  
+    fun dfa elms = (case elms of
+      [] =>
+        dfa [other_elm] |
+  
+      elm :: elms' =>
+        loop (elms', transition_start elm)
+    )
+
   in
     dfa
   end)

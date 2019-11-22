@@ -90,28 +90,6 @@ in
 end
 
 
-fun mk_trace_token tk_str = (let
-  val tk_id_list = (String.split_pattern (tk_str, "(\\.)+"))
-  val tk_fn  = (List.foldl
-    (fn (tk_id, tk_fn_acc) =>
-      (fn id =>
-        (tk_id = id) orelse 
-        (tk_fn_acc id)
-      )
-    )
-    (fn id => false)
-    tk_id_list
-  )
-in
-  tk_fn
-end)
-
-fun mk_trace str = (let
-  val tk_str_list = (String.split_pattern (str, "[ \t\n]+"))
-  val trace = (List.map mk_trace_token tk_str_list)
-in
-  trace
-end)
 
 
 fun verify [filename, trace_str]  = (let
@@ -120,7 +98,7 @@ fun verify [filename, trace_str]  = (let
   val (form, rem) = TokenStream.parse (15, tokenStream, printError filename)  
   val () = TextIO.closeIn inStream
 
-  val trace = rev (mk_trace trace_str)
+  val trace = rev (Trace.mk_trace trace_str)
   val answer = (
     if (Tree.verify (trace, form)) then
       "ACCEPTED"
@@ -140,7 +118,7 @@ fun verify_via_dfa [filename, trace_str]  = (let
   val () = TextIO.closeIn inStream
 
   val dfa = Tree.to_dfa form
-  val trace = mk_trace trace_str
+  val trace = Trace.mk_trace trace_str
 
   val answer = (
     if (dfa trace) then
@@ -166,16 +144,16 @@ fun monitor [filename]  = (let
 
     (_, []) => state_op |
 
-    (NONE, tk :: trace') => 
-      verify_trace (SOME (transition_start tk), trace') |
+    (NONE, elm :: trace') => 
+      verify_trace (SOME (transition_start elm), trace') |
 
-    (SOME state, tk :: trace') => 
-      verify_trace (SOME (transition (state, tk)), trace')
+    (SOME state, elm :: trace') => 
+      verify_trace (SOME (transition (state, elm)), trace')
 
   )
 
   fun verify_input (state_op, input) = (let
-    val trace = mk_trace input
+    val trace = Trace.mk_trace input
 
     val state_op' = verify_trace (state_op, trace)
     val result_string = (case state_op' of
