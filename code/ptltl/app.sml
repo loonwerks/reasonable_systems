@@ -10,6 +10,7 @@ val flagMapRef =
     ("--parse", false),
     ("--verify", false),
     ("--dfa", false),
+    ("--monitor", false),
     ("--help", false)
     ]))
 
@@ -21,6 +22,7 @@ fun printHelp () = (
   print "  --parse <spec.pt>\n";
   print "  --verify <spec.pt> [trace]\n";
   print "  --dfa  <spec.pt> [trace]\n";
+  print "  --monitor <spec.pt> \n";
   print "  --help \n";
   print "\n" ;
   print "Trace: \n" ;
@@ -151,6 +153,61 @@ in
   print (answer ^ "\n")
 end)
 
+fun monitor [filename]  = (let
+  val inStream = readFile filename
+  val tokenStream = CharStream.makeTokenStream (readStream inStream)
+  val (form, rem) = TokenStream.parse (15, tokenStream, printError filename)  
+  val () = TextIO.closeIn inStream
+
+
+  val (transition_start, transition) = Tree.mk_transitions form
+
+  fun verify_trace (state_op, trace) = (case (state_op, trace) of
+
+    (_, []) => state_op |
+
+    (NONE, tk :: trace') => 
+      verify_trace (SOME (transition_start tk), trace') |
+
+    (SOME state, tk :: trace') => 
+      verify_trace (SOME (transition (state, tk)), trace')
+
+  )
+
+  fun verify_input (state_op, input) = (let
+    val trace = mk_trace input
+
+    val state_op' = verify_trace (state_op, trace)
+    val result_string = (case state_op' of
+      NONE => "" |
+      SOME state' =>
+        (if state' form then
+          "ACCEPTED"
+        else
+          "REJECTED"
+        )
+    )
+    val _ = print (result_string ^ "\n")
+  in
+    state_op'
+  end)
+
+
+  fun repl state_op = (let
+    val _ = print "> "
+    val input_op = TextIO.inputLine TextIO.stdIn
+  in
+    (case input_op of
+      NONE => repl state_op |
+      SOME input => 
+        repl (verify_input (state_op, input))
+    )
+  end)
+
+in
+  repl (NONE)
+end)
+
 
 
 fun flagSet flagMap str =
@@ -162,7 +219,8 @@ fun handleRequest flagMap args = (
   if flagSet flagMap "--lex" then lex args else ();
   if flagSet flagMap "--parse" then parse args else ();
   if flagSet flagMap "--verify" then verify args else ();
-  if flagSet flagMap "--dfa" then verify_via_dfa args else ()
+  if flagSet flagMap "--dfa" then verify_via_dfa args else ();
+  if flagSet flagMap "--monitor" then monitor args args else ()
 ) handle 
    Fail m => print ("failed : " ^ m) |
    x => (raise x)

@@ -222,7 +222,7 @@ structure Tree = struct
   )
 
 
-  fun to_dfa form = (let 
+  fun mk_transitions form = (let 
     val subforms = mk_subforms form
     val size = List.length subforms
     
@@ -362,10 +362,18 @@ structure Tree = struct
       (rev subforms)
     )
 
+
+  in
+    (transition_start, transition) 
+  end)
+
+  fun to_dfa form = (let
+    val (transition_start, transition) = mk_transitions form
+  
     fun dfa tokens = (case tokens of
       [] =>
         dfa [other_token] |
-
+  
       tk :: tks => (let
         fun loop (tokens, state) = (case tokens of
           [] => state form |
@@ -380,7 +388,6 @@ structure Tree = struct
         loop (tks, transition_start tk)
       end)
     )
-
   in
     dfa
   end)

@@ -11,18 +11,58 @@ Make sure you have MLton (http://mlton.org/) installed.
 
 
 ### PTLTL
-The following types of commands are possible for the ptltl program:
+The following sorts of commands are possible for the `ptltl` program:
 ```bash
-bin/ptltl --lex specs/ptltl/spec_1.pt
-bin/ptltl --parse specs/ptltl/spec_1.pt
-bin/ptltl --verify specs/ptltl/spec_1.pt "a a b a b a.c a"
-bin/ptltl --dfa specs/ptltl/spec_1.pt "a a b a b.c a a"
+$ bin/ptltl --lex specs/ptltl/spec_1.pt
+1:1 ALWAYS
+1:3 LPAREN
+1:4 LPAREN
+1:5 ID
+1:7 LONGARROW
+1:9 PREV
+1:11 LPAREN
+...
+
+$ bin/ptltl --parse specs/ptltl/spec_1.pt
+(Always
+  (And
+    (Imp
+      (Id b),
+      (Prev
+        ...
+      )
+    ),
+    ...
+  )
+)
+
+
+$ bin/ptltl --verify specs/ptltl/spec_1.pt "a a b a b a.c a"
+ACCEPTED
+
+$ bin/ptltl --dfa specs/ptltl/spec_1.pt "a a b a b.c a a"
+ACCEPTED
+
+$ bin/ptltl --monitor specs/ptltl/spec_1.pt
+> a a a
+ACCEPTED
+> a b
+ACCEPTED
+> a b.c a.c
+ACCEPTED
+> b
+ACCEPTED
+> b
+REJECTED
+> a a a
+REJECTED
 ```
 
 The `--lex` flag generates a list of tokens from the specification.
 The `--parse` flag generates a tree from the specification.
 The `--verify` flag checks the specification against the string of tokens.
 The `--dfa` flag synthesizes a DFA from the specification and runs the DFA on the tokens.
+The `--monitor` flag synthesizes DFA transitions from the specification and runs the transitions on the sequences of tokens on interactive inputs.
 
 Example specifications are in `specs/ptltl`.  The tokens are separated by white space.  A token containing words with dots in between means that each word of that token is active simultaneously.  That is, the formula accepts the token if the formula requires a subset of those words.
 The concrete syntax of PTLTL is described in `code/ptltl/chars.lex` and `code/ptltl/tokens.yacc`.
