@@ -198,7 +198,7 @@ fun monitor [filename]  = (let
     val input_op = TextIO.inputLine TextIO.stdIn
   in
     (case input_op of
-      NONE => repl state_op |
+      NONE => () |
       SOME input => 
         repl (verify_input (state_op, input))
     )
@@ -220,7 +220,7 @@ fun handleRequest flagMap args = (
   if flagSet flagMap "--parse" then parse args else ();
   if flagSet flagMap "--verify" then verify args else ();
   if flagSet flagMap "--dfa" then verify_via_dfa args else ();
-  if flagSet flagMap "--monitor" then monitor args args else ()
+  if flagSet flagMap "--monitor" then monitor args else ()
 ) handle 
    Fail m => print ("failed : " ^ m) |
    x => (raise x)
