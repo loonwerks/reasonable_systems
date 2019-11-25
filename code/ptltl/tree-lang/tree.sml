@@ -21,62 +21,52 @@ structure Tree = struct
   
   val other_elm = (fn id => false) 
 
-  fun surround tag body = (let
-    val abc = "(" ^ tag
-    val bodyLines = String.tokens (fn c => c = #"\n") body
-    val indentedLines = map (fn l => "  " ^ l) bodyLines
-    val indentedBody = String.concatWith "\n" indentedLines 
-    val xyz = if body = "" then ")" else "\n" ^ indentedBody ^ "\n)"
-  in
-    abc ^ xyz 
-  end)
-
 
   fun toString form = (case form of
     Id str => "(Id " ^ str ^ ")"  |
     Prim b => "(Prim " ^ (Bool.toString b) ^ ")" |
   
-    Imp (f1, f2) => surround "Imp" (
+    Imp (f1, f2) => String.surround "Imp" (
       (toString f1) ^ ",\n" ^ (toString f2)
     ) |
 
-    Equiv (f1, f2) => surround "Equiv" (
+    Equiv (f1, f2) => String.surround "Equiv" (
       (toString f1) ^ ",\n" ^ (toString f2)
     ) |
 
-    Or (f1, f2) => surround "Or" (
+    Or (f1, f2) => String.surround "Or" (
       (toString f1) ^ ",\n" ^ (toString f2)
     ) |
 
-    Xor (f1, f2) => surround "Xor" (
+    Xor (f1, f2) => String.surround "Xor" (
       (toString f1) ^ ",\n" ^ (toString f2)
     ) |
 
-    And (f1, f2) => surround "And" (
+    And (f1, f2) => String.surround "And" (
       (toString f1) ^ ",\n" ^ (toString f2)
     ) |
 
-    Since (f1, f2) => surround "Since" (
+    Since (f1, f2) => String.surround "Since" (
       (toString f1) ^ ",\n" ^ (toString f2)
     ) |
   
     Always f =>
-      surround "Always" (toString f) |
+      String.surround "Always" (toString f) |
 
     Once f => 
-      surround "Once" (toString f) |
+      String.surround "Once" (toString f) |
 
     Prev f => 
-      surround "Prev" (toString f) |
+      String.surround "Prev" (toString f) |
 
     Start f => 
-      surround "Start" (toString f) |
+      String.surround "Start" (toString f) |
 
     End f => 
-      surround "End" (toString f) |
+      String.surround "End" (toString f) |
 
     Not f => 
-      surround "Not" (toString f)
+      String.surround "Not" (toString f)
   )
 
   (* trace has most recent label on top *)
