@@ -1,7 +1,1 @@
-(
-  ~(a /\ b) /\
-  (
-    (b --> prev (~b since a)) \/
-    a
-  )
-)
+(b --> prev (~b since a)) /\ ~(a /\ b)
