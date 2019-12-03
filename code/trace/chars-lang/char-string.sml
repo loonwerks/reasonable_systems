@@ -17,7 +17,9 @@ structure Char_String = struct
   end)
   
   fun mk_trace str = (let
-    val elm_str_list = (String.split_pattern (str, "[ \t\n]+"))
+    val trimmed_str = String.substring (str, 0, (String.size str) - 1)
+    val elm_str_list = (String.split_pattern (trimmed_str, "[ \t\r\n\f\v]+"))
+    val trace_length = List.length elm_str_list
     val trace = (List.map mk_elm elm_str_list)
   in
     trace

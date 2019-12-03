@@ -365,8 +365,7 @@ structure Tree = struct
       elm :: elms' => (let
         val state' = transition (state, elm)
       in
-        (state' form) andalso 
-        loop (elms, state')
+        loop (elms', state')
       end)
     )
   
