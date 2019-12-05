@@ -10,6 +10,7 @@ val flagMapRef =
     ("--parse", false),
     ("--verify", false),
     ("--dfa", false),
+    ("--graph", false),
     ("--monitor", false),
     ("--help", false)
     ]))
@@ -22,6 +23,7 @@ fun printHelp () = (
   print "  --parse <spec.pt>\n";
   print "  --verify <spec.pt> [trace]\n";
   print "  --dfa  <spec.pt> [trace]\n";
+  print "  --graph  <spec.pt> \n";
   print "  --monitor <spec.pt> \n";
   print "  --help \n";
   print "\n" ;
@@ -131,6 +133,22 @@ in
   print (answer ^ "\n")
 end)
 
+fun draw_graph [filename]  = (let
+  val inStream = readFile filename
+  val tokenStream = CharStream.makeTokenStream (readStream inStream)
+  val (form, rem) = TokenStream.parse (15, tokenStream, printError filename)  
+  val () = TextIO.closeIn inStream
+
+  val graph_str = Tree.to_dot_graph (Tree.to_dfa_graph form)
+
+  val graph_filename = mkOutputFilename filename ".graph"
+  val out_stream = TextIO.openOut graph_filename
+  val () = TextIO.output (out_stream, graph_str)
+  val () = TextIO.closeOut out_stream
+in
+  ()
+end)
+
 fun monitor [filename]  = (let
   val inStream = readFile filename
   val tokenStream = CharStream.makeTokenStream (readStream inStream)
@@ -197,6 +215,7 @@ fun handleRequest flagMap args = (
   if flagSet flagMap "--parse" then parse args else ();
   if flagSet flagMap "--verify" then verify args else ();
   if flagSet flagMap "--dfa" then verify_via_dfa args else ();
+  if flagSet flagMap "--graph" then draw_graph args else ();
   if flagSet flagMap "--monitor" then monitor args else ()
 ) handle 
    Fail m => print ("failed : " ^ m) |

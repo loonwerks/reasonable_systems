@@ -1,0 +1,4 @@
+#!/bin/bash
+
+dot -Tpng $1 -o $1.png;
+google-chrome $1.png
