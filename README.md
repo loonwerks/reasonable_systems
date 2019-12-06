@@ -58,6 +58,11 @@ ACCEPTED
 REJECTED
 > a a a
 REJECTED
+
+
+$ bin/ptltl --graph specs/ptltl/spec_1.pt 
+$ ./show_graph specs/ptltl/spec_1.pt.graph 
+
 ```
 
 The `--lex` flag generates a list of tokens from the specification.
@@ -65,6 +70,7 @@ The `--parse` flag generates a tree from the specification.
 The `--verify` flag checks the specification against the string of tokens.
 The `--dfa` flag synthesizes a DFA from the specification and runs the DFA on the tokens.
 The `--monitor` flag synthesizes DFA transitions from the specification and runs the transitions on the sequences of tokens on interactive inputs.
+The `--graph` flag syntehsizes a DFA graph and writes a DOT graph representation to `<input_file>.graph`. Running `./show_graph <input_file>.graph` will convert the DOT file to a PNG and open in Google Chrome.
 
 Example specifications are in `specs/ptltl`.  The tokens are separated by white space.  A token containing words with dots in between means that each word of that token is active simultaneously.  That is, the formula accepts the token if the formula requires a subset of those words.
 The concrete syntax of PTLTL is described in `code/ptltl/chars.lex` and `code/ptltl/tokens.yacc`.
