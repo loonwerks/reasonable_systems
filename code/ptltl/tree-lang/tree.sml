@@ -12,7 +12,7 @@ structure Tree = struct
     And of (formula * formula) |
     Since of (formula * formula) |
   
-    Always of formula |
+    Histor of formula |
     Once of formula |
     Prev of formula |
     Start of formula |
@@ -64,8 +64,8 @@ structure Tree = struct
       (toString f1) ^ ",\n" ^ (toString f2)
     ) |
   
-    Always f =>
-      String.surround "Always" (toString f) |
+    Histor f =>
+      String.surround "Histor" (toString f) |
 
     Once f => 
       String.surround "Once" (toString f) |
@@ -133,10 +133,10 @@ structure Tree = struct
           verify (trace_prev, Since (f1, f2))
         ) |
 
-      Always f =>
+      Histor f =>
         verify (trace, f) andalso (
           (null trace_prev) orelse
-          verify (trace_prev, Always f)
+          verify (trace_prev, Histor f)
         ) |
 
      
@@ -206,8 +206,8 @@ structure Tree = struct
       (mk_subforms f1) @
       (mk_subforms f2) |
   
-    Always f =>
-      Always f :: (mk_subforms f) |
+    Histor f =>
+      Histor f :: (mk_subforms f) |
 
     Once f =>
       Once f :: (mk_subforms f) |
@@ -258,7 +258,7 @@ structure Tree = struct
         (state f1) andalso 
         (state f2) |
 
-      Always f => 
+      Histor f => 
         (state f) |
 
       Once f => 
@@ -326,9 +326,9 @@ structure Tree = struct
           state (Since (f1, f2))
         ) |
 
-      Always f =>
+      Histor f =>
         (state_acc f) andalso
-        (state (Always f)) |
+        (state (Histor f)) |
 
       Once f =>
         (state_acc f) orelse
@@ -428,7 +428,7 @@ structure Tree = struct
     Since (f1, f2) =>
       extract_prims f1 @ extract_prims f2 |
   
-    Always f =>
+    Histor f =>
       extract_prims f |
 
     Once f => 

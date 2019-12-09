@@ -1,1 +1,1 @@
-(always (a /\ (~b))) \/ (always (b /\ (~a)))
+(histor (a /\ (~b))) \/ (histor (b /\ (~a)))

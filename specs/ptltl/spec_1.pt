@@ -1,1 +1,1 @@
-always ((b --> prev (~b since a)) /\ ~(a /\ b))
+histor ((b --> prev (~b since a)) /\ ~(a /\ b))

@@ -58,7 +58,7 @@ digit=[0-9];
 <INITIAL>"/\\" => (WEDGE (!linenum, inccol 1));
 <INITIAL>"since" => (SINCE (!linenum, inccol 1));
 
-<INITIAL>"always" => (ALWAYS (!linenum, inccol 1));
+<INITIAL>"histor" => (HISTOR (!linenum, inccol 1));
 <INITIAL>"once" => (ONCE (!linenum, inccol 1));
 <INITIAL>"prev" => (PREV (!linenum, inccol 1));
 <INITIAL>"start" => (START (!linenum, inccol 1));

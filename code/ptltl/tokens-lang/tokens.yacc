@@ -7,7 +7,7 @@ open Tree
 %term
   TRUE | FALSE | 
   LONGARROW | DARROW | VEE | DPLUS | WEDGE | SINCE |
-  ALWAYS | ONCE | PREV | START | END | TILDE |
+  HISTOR | ONCE | PREV | START | END | TILDE |
   LPAREN | RPAREN |
   ID of string |
   EOF | BAD
@@ -24,7 +24,7 @@ open Tree
 %noshift EOF
 
 %nonassoc LONGARROW DARROW VEE DPLUS WEDGE SINCE 
-%nonassoc ALWAYS ONCE PREV START END TILDE 
+%nonassoc HISTOR ONCE PREV START END TILDE 
 
 %start tree_nt
 
@@ -47,7 +47,7 @@ form_nt:
   form_nt WEDGE form_nt (And (form_nt1, form_nt2)) |
   form_nt SINCE form_nt (Since (form_nt1, form_nt2)) |
 
-  ALWAYS form_nt (Always form_nt) |
+  HISTOR form_nt (Histor form_nt) |
   ONCE form_nt (Once form_nt) |
   PREV form_nt (Prev form_nt) |
   START form_nt (Start form_nt) |
