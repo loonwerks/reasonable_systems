@@ -1,0 +1,4 @@
+INCLUDES = ../../../cakeml/basis ../../../cakeml/misc ../../../cakeml/semantics ../../../cakeml/translator\
+           ../../../cakeml/semantics ../../../cakeml/compiler/parsing ../../../cakeml/unverified/sexpr-bootstrap
+
+CLINE_OPTIONS = --qof
