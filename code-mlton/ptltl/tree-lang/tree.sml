@@ -86,13 +86,8 @@ structure Tree = struct
   (* trace has most recent label on top *)
   fun verify (trace, form) = (let
 
-    (*
-    ** val _ = print ("stack: [" ^ (String.concatWith ", " trace) ^ "]\n") 
-    *)
-
     val (elm, trace_prev) = (case trace of
       [] => (other_elm, []) |
-      [x] => (x, []) |
       x :: xs => (x, xs)
     )
 
