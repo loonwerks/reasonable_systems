@@ -26,12 +26,39 @@ Definition other_elm_def :
  other_elm = K F
 End
 
+Definition remove_dups_f_def :
+  remove_dups_f xs f =
+  (case xs
+  of [] => []
+   | x :: xs' =>
+     let xs'' = FILTER (\ y . (f y) <> (f x)) xs' in
+     x :: (remove_dups_f xs'' f)
+  )
+Termination
+WF_REL_TAC `measure (\(xs, _). (LENGTH xs))`
+>> (Induct_on `xs'`
+   >- fs []
+   >- (rw [LENGTH]
+      >- fs []
+      >- (fs [LENGTH]
+         >> `LENGTH (FILTER (λy. f y ≠ f x) xs') < SUC (LENGTH xs')` by rw []
+         >> rw []
+      )
+   )
+)
+End
+
+
+Definition remove_dups_def :
+  remove_dups xs = remove_dups_f xs (\x.x)
+End
+
+(*---------------------------------------------------------------------------*)
+(* Start and End clauses are expanded versions of the original. Need an      *)
+(* extra congruence rule to extract the right termination conditions         *)
+(*---------------------------------------------------------------------------*)
+
 val _ = DefnBase.add_cong LEFT_AND_CONG;
-
-(*---------------------------------------------------------------------------*)
-(* Start and End clauses are expanded versions of the original.              *)
-(*---------------------------------------------------------------------------*)
-
 
 Definition verify_def :
  verify trace form <=>
@@ -67,11 +94,6 @@ WF_REL_TAC `inv_image ($< LEX $<) (\(x,y). (formula_size y, LENGTH x))`
  >> TRY (Cases_on `trace` >> fs[])
  >> metis_tac[]
 End
-
-
-
-
-
 
 (* state machine *)
 
@@ -111,220 +133,95 @@ Definition mk_subforms_def :
 End
 
 
-Definition remove_dups_f_def :
-  remove_dups_f xs f =
-  (case xs
-  of [] => []
-   | x :: xs' =>
-     let xs'' = FILTER (\ y . (f y) <> (f x)) xs' in
-     x :: (remove_dups_f xs'' f)
+Definition decide_formula_start_def :
+ decide_formula_start fm state elm =
+  (case fm
+    of Id str     => elm str
+    | Prim b      => b
+    | Not f       => ~state f
+    | Imp f1 f2   => ~(state f1 \/ state f2)
+    | Equiv f1 f2 => (state f1 = state f2)
+    | Or f1 f2    => (state f1 \/ state f2)
+    | Xor f1 f2   => ~(state f1 = state f2)
+    | And f1 f2   => (state f1 /\ state f2)
+    | Since f1 f2 => (state f1 /\ state f2)
+    | Always f    => state f
+    | Once f      => state f
+    | Prev f      => state f
+    | Start f     => F
+    | End f       => F
   )
-Termination
-WF_REL_TAC `measure (\(xs, _). (LENGTH xs))`
->> (Induct_on `xs'` 
-   >- fs []
-   >- (rw [LENGTH]
-      >- fs []
-      >- (fs [LENGTH]
-         >> `LENGTH (FILTER (λy. f y ≠ f x) xs') < SUC (LENGTH xs')` by rw []
-         >> rw []
-      )
-   )
-)
 End
 
+Definition decide_formula_def :
+ decide_formula fm state state_acc elm =
+  (case fm of
+     Id str => elm str
+   | Prim b => b
+   | Not f  => ~state_acc f
+   | Imp f1 f2   => (~state_acc f1 \/ state_acc f2)
+   | Equiv f1 f2 => (state_acc f1 = state_acc f2)
+   | Or f1 f2    => (state_acc f1 \/ state_acc f2)
+   | Xor f1 f2   => ~(state_acc f1 = state_acc f2)
+   | And f1 f2   => (state_acc f1 /\ state_acc f2)
+   | Since f1 f2 => (state_acc f2 \/ (state_acc f1 /\ state (Since f1 f2)))
+   | Always f    => (state_acc f /\ state (Always f))
+   | Once f      => (state_acc f \/ state (Once f))
+   | Prev f      => state f
+   | Start f     => (state_acc f /\ ~state f)
+   | End f       => (~state_acc f /\ state f)
+ )
+End
 
-Definition remove_dups_def :
-  remove_dups xs = remove_dups_f xs (\x.x)
+Definition transition_start_def :
+ transition_start sforms elm =
+   FOLDL
+     (\state_acc fm.
+         let decision = decide_formula_start fm state_acc elm
+         in (\fm'. if fm = fm' then decision else (state_acc fm')))
+     empty_state
+     sforms
+End
+
+Definition transition_def:
+ transition sforms state elm =
+   FOLDL
+     (\state_acc fm.
+         let decision = decide_formula fm state state_acc elm
+         in (\fm'. if fm = fm' then decision else (state_acc fm')))
+      empty_state
+      sforms
+End
+
+Definition mk_transitions_def :
+ mk_transitions form =
+   let subforms = REVERSE (nub (mk_subforms form));
+   in (transition_start subforms,
+       transition subforms)
+End
+
+Definition dfa_loop_def :
+ dfa_loop delta form elms state =
+   (case elms
+     of [] => state form
+      | elm :: elms' => dfa_loop delta form elms' (delta state elm))
+End
+
+Definition to_dfa_def :
+ to_dfa form =
+   let (transition_start, transition) = mk_transitions form;
+   in \elms. case elms
+              of [] => dfa_loop transition form [] (transition_start other_elm)
+               | elm :: elms' => dfa_loop transition form elms' (transition_start elm)
 End
 
 val _ = export_theory();
 
 
 (* ****interactive proof scrap work: *****
-val TODO_def = Hol_defn "TODO" ` 
+val TODO_def = Hol_defn "TODO" `
 
 
 `
 Defn.tgoal TODO_def
 *)
-
-
-(*
-fun mk_transitions form = (let 
-  val subforms = unique (mk_subforms form)
-  val size = List.length subforms
-  
-  fun decide_formula_start (fm, state, elm) = (case fm of
-    Id str =>
-      (elm str) |
-
-    Prim b =>
-      b |
-
-    Imp (f1, f2) => 
-      not (state f1) orelse
-      (state f2) |
-
-    Equiv (f1, f2) => 
-      (state f1) = (state f2) |
-
-    Or (f1, f2) =>
-      (state f1) orelse (state f2) |
-
-    Xor (f1, f2) =>
-      not ((state f1) = (state f2)) |
-
-    And (f1, f2) =>
-      (state f1) andalso (state f2) |
-
-    Since (f1, f2) =>
-      (state f1) andalso 
-      (state f2) |
-
-    Histor f => 
-      (state f) |
-
-    Once f => 
-      (state f) |
-
-    Prev f => 
-      (state f) |
-
-    Start f =>
-      false |
-
-    End f => 
-      false |
-
-    Not f => 
-      not (state f)
-  )
-
-
-  (* the state is represented as a mapping from subformulas to booleans *) 
-    
-  
-  fun transition_start elm = (List.foldl
-    (fn (fm, state_acc) => let
-      val decision =
-        decide_formula_start (fm, state_acc, elm)
-    in
-      (fn fm' => 
-        if fm = fm' then
-          decision
-        else
-          (state_acc fm')
-      )
-    end)
-    empty_state 
-    (rev subforms)
-  )
-
-  fun decide_formula (fm, state, state_acc, elm) = (case fm of
-    Id str =>
-      (elm str) |
-
-    Prim b =>
-      b |
-
-    Imp (f1, f2) => 
-      not (state_acc f1) orelse
-      (state_acc f2) |
-
-    Equiv (f1, f2) =>
-      (state_acc f1) = (state_acc f2) |
-
-    Or (f1, f2) =>
-      (state_acc f1) orelse (state_acc f2) |
-
-    Xor (f1, f2) =>
-      not ((state_acc f1) = (state_acc f2)) |
-
-    And (f1, f2) =>
-      (state_acc f1) andalso (state_acc f2) |
-
-    Since (f1, f2) =>
-      (state_acc f2) orelse (
-        state_acc f1 andalso
-        state (Since (f1, f2))
-      ) |
-
-    Histor f =>
-      (state_acc f) andalso
-      (state (Histor f)) |
-
-    Once f =>
-      (state_acc f) orelse
-      (state (Once f)) |
-
-    Prev f =>
-      (state f) |
-
-    Start f =>
-      (state_acc f) andalso
-      not (state f) |
-
-    End f =>
-      not (state_acc f) andalso
-      (state f) |
-
-    Not f => 
-      not (state_acc f) 
-    
-  )
-
-  fun transition (state, elm) = (List.foldl
-    (fn (fm, state_acc) => let
-      val decision =
-        decide_formula (fm, state, state_acc, elm)
-    in
-      (fn fm' => 
-        if fm = fm' then
-          decision
-        else
-          (state_acc fm')
-      )
-    end)
-    empty_state
-    (rev subforms)
-  )
-
-
-in
-  (transition_start, transition) 
-end)
-
-fun to_dfa form = (let
-  val (transition_start, transition) = mk_transitions form
-
-  fun loop (elms, state) = (case elms of
-    [] => state form |
-    elm :: elms' => (let
-      val state' = transition (state, elm)
-    in
-      loop (elms', state')
-    end)
-  )
-
-  fun dfa elms = (case elms of
-    [] =>
-      dfa [other_elm] |
-
-    elm :: elms' =>
-      loop (elms', transition_start elm)
-  )
-
-in
-  dfa
-end)
-
-
-
-*)
-
-
-
-
-
-
