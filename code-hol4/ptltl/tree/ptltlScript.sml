@@ -71,4 +71,104 @@ WF_REL_TAC `inv_image ($< LEX $<) (\(x,y). (formula_size y, LENGTH x))`
  >> metis_tac[]
 End
 
+Definition mk_subforms_def :
+  mk_subforms  (Id str) = [Id str] /\
+  mk_subforms  (Prim b) = [Prim b] /\
+  mk_subforms  (Imp f1 f2) = Imp f1 f2::(mk_subforms f1 ++ mk_subforms f2) /\
+  mk_subforms  (Equiv f1 f2) = Equiv f1 f2::(mk_subforms f1 ++ mk_subforms f2) /\
+  mk_subforms  (Or f1 f2) = Or f1 f2::(mk_subforms f1 ++ mk_subforms f2) /\
+  mk_subforms  (Xor f1 f2) = Xor f1 f2::(mk_subforms f1 ++ mk_subforms f2) /\
+  mk_subforms  (And f1 f2) = And f1 f2::(mk_subforms f1 ++ mk_subforms f2) /\
+  mk_subforms  (Since f1 f2) = Since f1 f2::(mk_subforms f1 ++ mk_subforms f2) /\
+  mk_subforms  (Always f) = Always f::mk_subforms f /\
+  mk_subforms  (Once f) = Once f::mk_subforms f /\
+  mk_subforms  (Prev f) = Prev f::mk_subforms f /\
+  mk_subforms  (Start f) = Start f::mk_subforms f /\
+  mk_subforms  (End f) = End f::mk_subforms f /\
+  mk_subforms  (Not f) = Not f::mk_subforms f
+End
+
+Definition decide_formula_start_def :
+ decide_formula_start fm state elm =
+  (case fm
+    of Id str     => elm str
+    | Prim b      => b
+    | Not f       => ~state f
+    | Imp f1 f2   => ~(state f1 \/ state f2)
+    | Equiv f1 f2 => (state f1 = state f2)
+    | Or f1 f2    => (state f1 \/ state f2)
+    | Xor f1 f2   => ~(state f1 = state f2)
+    | And f1 f2   => (state f1 /\ state f2)
+    | Since f1 f2 => (state f1 /\ state f2)
+    | Always f    => state f
+    | Once f      => state f
+    | Prev f      => state f
+    | Start f     => F
+    | End f       => F
+  )
+End
+
+
+Definition transition_start_def :
+ transition_start sforms elm =
+   FOLDL
+     (\state_acc fm.
+         let decision = decide_formula_start fm state_acc elm
+         in (\fm'. if fm = fm' then decision else (state_acc fm')))
+     empty_state
+     sforms
+End
+
+Definition decide_formula_def :
+ decide_formula fm state state_acc elm =
+  (case fm of
+     Id str => elm str
+   | Prim b => b
+   | Not f  => ~state_acc f
+   | Imp f1 f2   => (~state_acc f1 \/ state_acc f2)
+   | Equiv f1 f2 => (state_acc f1 = state_acc f2)
+   | Or f1 f2    => (state_acc f1 \/ state_acc f2)
+   | Xor f1 f2   => ~(state_acc f1 = state_acc f2)
+   | And f1 f2   => (state_acc f1 /\ state_acc f2)
+   | Since f1 f2 => (state_acc f2 \/ (state_acc f1 /\ state (Since f1 f2)))
+   | Always f    => (state_acc f /\ state (Always f))
+   | Once f      => (state_acc f \/ state (Once f))
+   | Prev f      => state f
+   | Start f     => (state_acc f /\ ~state f)
+   | End f       => (~state_acc f /\ state f)
+ )
+End
+
+Definition transition_def:
+ transition sforms state elm =
+   FOLDL
+     (\state_acc fm.
+         let decision = decide_formula fm state state_acc elm
+         in (\fm'. if fm = fm' then decision else (state_acc fm')))
+      empty_state
+      sforms
+End
+
+Definition mk_transitions_def :
+ mk_transitions form =
+   let subforms = REVERSE (nub (mk_subforms form));
+   in (transition_start subforms,
+       transition subforms)
+End
+
+Definition dfa_loop_def :
+ dfa_loop delta form elms state =
+   (case elms
+     of [] => state form
+      | elm :: elms' => dfa_loop delta form elms' (delta state elm))
+End
+
+Definition to_dfa_def :
+ to_dfa form =
+   let (transition_start, transition) = mk_transitions form;
+   in \elms. case elms
+              of [] => dfa_loop transition form [] (transition_start other_elm)
+               | elm :: elms' => dfa_loop transition form elms' (transition_start elm)
+End
+
 val _ = export_theory();
