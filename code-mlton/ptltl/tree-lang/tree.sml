@@ -23,18 +23,16 @@ structure Tree = struct
 
   val empty_state = (fn fm => false)
 
-  fun unique_f xs f = (case xs of
+  fun remove_dups_f xs f = (case xs of
     [] => [] |
-    x :: xs' => (case (List.find
-      (fn y => (f y) = (f x))
-      xs'
-    ) of
-      NONE => x :: (unique_f xs' f) |
-      SOME _ => (unique_f xs' f) 
-    )
+    x :: xs' => (let
+      val xs'' = List.filter (fn y => (f y) <> (f x)) xs'
+    in
+      x :: (remove_dups_f xs'' f)
+    end)
   )
 
-  fun unique xs = unique_f xs (fn x => x)
+  fun remove_dups xs = remove_dups_f xs (fn x => x)
 
   fun toString form = (case form of
     Id str => "(Id " ^ str ^ ")"  |
@@ -223,7 +221,7 @@ structure Tree = struct
 
 
   fun mk_transitions form = (let 
-    val subforms = unique (mk_subforms form)
+    val subforms = remove_dups (mk_subforms form)
     val size = List.length subforms
     
     fun decide_formula_start (fm, state, elm) = (case fm of
@@ -402,7 +400,7 @@ structure Tree = struct
     end)
   )
 
-  fun extract_prims form = unique (case form of
+  fun extract_prims form = remove_dups (case form of
     Id str => [str] |
     Prim b => [] |
     Imp (f1, f2) =>
@@ -453,7 +451,7 @@ structure Tree = struct
     val other_elm_id = "_"
     val prim_list = extract_prims form
 
-    val elm_pairs = unique_f (List.map
+    val elm_pairs = remove_dups_f (List.map
       (fn prims => (
         String.concatWith "." prims,
         (fn q_prim => (case (List.find
@@ -482,7 +480,7 @@ structure Tree = struct
           1 + (first_index (xs', f))
     )
 
-    val subforms = unique (mk_subforms form)
+    val subforms = remove_dups (mk_subforms form)
     val subform_sets = power_set subforms
 
 
@@ -567,7 +565,7 @@ structure Tree = struct
         (find_reachable_edges (new_edges @ edges))
     end)
 
-    val edges = unique_f (find_reachable_edges start_edges)
+    val edges = remove_dups_f (find_reachable_edges start_edges)
       (fn ((st,_), (label, _), (st', _)) => (st, label, st'))
 
     fun is_reachable state_str = (case (List.find
