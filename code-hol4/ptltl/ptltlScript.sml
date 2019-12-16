@@ -30,22 +30,13 @@ Definition remove_dups_f_def :
   remove_dups_f xs f =
   (case xs
   of [] => []
-   | x :: xs' =>
-     let xs'' = FILTER (\ y . (f y) <> (f x)) xs' in
-     x :: (remove_dups_f xs'' f)
+   | x :: xs' => (
+       if (EXISTS (\ y . (f y) = (f x)) xs') then
+         (remove_dups_f xs' f)
+       else
+         x :: (remove_dups_f xs' f)
+     )
   )
-Termination
-WF_REL_TAC `measure (\(xs, _). (LENGTH xs))`
->> (Induct_on `xs'`
-   >- fs []
-   >- (rw [LENGTH]
-      >- fs []
-      >- (fs [LENGTH]
-         >> `LENGTH (FILTER (λy. f y ≠ f x) xs') < SUC (LENGTH xs')` by rw []
-         >> rw []
-      )
-   )
-)
 End
 
 
@@ -145,7 +136,7 @@ Definition decide_formula_start_def :
     | Xor f1 f2   => ~(state f1 = state f2)
     | And f1 f2   => (state f1 /\ state f2)
     | Since f1 f2 => (state f1 /\ state f2)
-    | Always f    => state f
+    | Histor f    => state f
     | Once f      => state f
     | Prev f      => state f
     | Start f     => F
@@ -165,7 +156,7 @@ Definition decide_formula_def :
    | Xor f1 f2   => ~(state_acc f1 = state_acc f2)
    | And f1 f2   => (state_acc f1 /\ state_acc f2)
    | Since f1 f2 => (state_acc f2 \/ (state_acc f1 /\ state (Since f1 f2)))
-   | Always f    => (state_acc f /\ state (Always f))
+   | Histor f    => (state_acc f /\ state (Histor f))
    | Once f      => (state_acc f \/ state (Once f))
    | Prev f      => state f
    | Start f     => (state_acc f /\ ~state f)
