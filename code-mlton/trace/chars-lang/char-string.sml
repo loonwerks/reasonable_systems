@@ -15,12 +15,11 @@ structure Char_String = struct
   in
     elm
   end)
-  
+
   fun mk_trace str = (let
-    val trimmed_str = String.substring (str, 0, (String.size str) - 1)
-    val elm_str_list = (String.split_pattern (trimmed_str, "[ \t\r\n\f\v]+"))
-    val trace_length = List.length elm_str_list
-    val trace = (List.map mk_elm elm_str_list)
+    val elm_str_list = (String.split_pattern (str, "[ \t\r\n\f\v]+"))
+    val trimmed_elm_str_list = List.filter (fn str => str <> "") elm_str_list
+    val trace = (List.map mk_elm trimmed_elm_str_list)
   in
     trace
   end)

@@ -171,7 +171,7 @@ fun monitor [filename]  = (let
   )
 
   fun verify_input (state_op, input) = (let
-    val trace = Trace.mk_trace input
+    val trace = Trace.mk_trace input 
     val state_op' = verify_trace (state_op, trace)
     val result_string = (case state_op' of
       NONE => "" |

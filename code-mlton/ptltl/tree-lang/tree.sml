@@ -25,11 +25,11 @@ structure Tree = struct
 
   fun remove_dups_f xs f = (case xs of
     [] => [] |
-    x :: xs' => (let
-      val xs'' = List.filter (fn y => (f y) <> (f x)) xs'
-    in
-      x :: (remove_dups_f xs'' f)
-    end)
+    x :: xs' => (if (List.exists (fn y => (f x) = (f y)) xs') then
+      remove_dups_f xs' f
+    else
+      x :: (remove_dups_f xs' f)
+    )
   )
 
   fun remove_dups xs = remove_dups_f xs (fn x => x)
