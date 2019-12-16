@@ -26,24 +26,6 @@ Definition other_elm_def :
  other_elm = K F
 End
 
-Definition remove_dups_f_def :
-  remove_dups_f xs f =
-  (case xs
-  of [] => []
-   | x :: xs' => (
-       if (EXISTS (\ y . (f y) = (f x)) xs') then
-         (remove_dups_f xs' f)
-       else
-         x :: (remove_dups_f xs' f)
-     )
-  )
-End
-
-
-Definition remove_dups_def :
-  remove_dups xs = remove_dups_f xs (\x.x)
-End
-
 (*---------------------------------------------------------------------------*)
 (* Start and End clauses are expanded versions of the original. Need an      *)
 (* extra congruence rule to extract the right termination conditions         *)
