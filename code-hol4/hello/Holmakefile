@@ -1,4 +1,23 @@
-INCLUDES = ../../../cakeml/basis ../../../cakeml/misc ../../../cakeml/semantics ../../../cakeml/translator\
-           ../../../cakeml/semantics ../../../cakeml/compiler/parsing ../../../cakeml/unverified/sexpr-bootstrap
+#CLINE_OPTIONS = --qof
 
-CLINE_OPTIONS = --qof
+INCLUDES = ../../../cakeml/basis ../../../cakeml/misc ../../../cakeml/semantics ../../../cakeml/translator ../../../cakeml/semantics ../../../cakeml/compiler/parsing ../../../cakeml/unverified/sexpr-bootstrap
+
+#all: $(DEFAULT_TARGETS) hello
+#
+#.PHONY: all
+#
+
+hello: hello.S
+	cc -o hello ../../../cakeml/basis/basis_ffi.c hello.S
+
+hello.S: hello.scake
+	../../../cake-x64-64/cake --sexp=true < hello.scake > hello.S;
+
+hello.scake: build
+	./build
+
+build : build.uo
+	$(protect $(HOLDIR)/bin/buildheap) build.uo -o $@ --exe main
+
+
+EXTRA_CLEANS = build hello.scake hello.S hello
