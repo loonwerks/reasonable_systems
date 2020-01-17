@@ -1,0 +1,67 @@
+#CLINE_OPTIONS = --qof
+
+INCLUDES = $(CAKEMLDIR)/basis $(CAKEMLDIR)/misc $(CAKEMLDIR)/semantics $(CAKEMLDIR)/translator $(CAKEMLDIR)/semantics $(CAKEMLDIR)/compiler/parsing $(CAKEMLDIR)/unverified/sexpr-bootstrap $(HOLDIR)/tools/mlyacc/mlyacclib $(CAKEMLDIR)/basis/pure $(CAKEMLDIR)/characteristic
+
+
+
+
+
+MLYACCLIB = $(protect $(HOLDIR)/tools/mlyacc/mlyacclib/)
+MLYACCLIB_UIS = $(patsubst %,MLY_%.ui,base-sig join lrtable parser2 stream)
+
+EXTRA_CLEANS = ptltl.grm-sig.sml ptltl.grm.sml ptltl.lex.sig \
+               ptltl.lex.sml ptltl.grm.sig \
+							 synthesize.exe
+
+THYFILES = $(patsubst %Script.sml,%Theory.uo,$(wildcard *.sml))
+TARGETS = $(patsubst %.sml,%.uo,$(THYFILES))
+
+all: $(TARGETS) synthesize.exe
+.PHONY: all
+
+
+PtltlTree.uo: PtltlTree.sml
+	$(HOLMOSMLC) -c PtltlTree.sml
+
+ptltl.grm.sml ptltl.grm-sig.sml: ptltl.grm PtltlTree.sml
+	$(protect $(HOLDIR)/tools/mlyacc/src/mlyacc.exe) $<
+	$(MV) ptltl.grm.sig ptltl.grm-sig.sml
+
+ptltl.grm-sig.uo: ptltl.grm-sig.sml PtltlTree.uo
+	$(HOLMOSMLC) -toplevel -c -I $(MLYACCLIB) $(MLYACCLIB_UIS) $<
+
+ptltl.grm.uo: ptltl.grm.sml ptltl.grm-sig.uo PtltlTree.uo
+	$(HOLMOSMLC) -toplevel -c -I $(MLYACCLIB) $(MLYACCLIB_UIS) ptltl.grm-sig.ui $<
+
+PtltlTokens.uo: PtltlTokens.sml ptltl.grm.uo PtltlTree.uo
+	$(HOLMOSMLC) -c -I $(MLYACCLIB) $(MLYACCLIB_UIS) ptltl.grm.ui $<
+
+PtltlTokenStream.uo: PtltlTokenStream.sml PtltlTokens.uo ptltl.grm.uo PtltlTree.uo
+	$(HOLMOSMLC) -c -I $(MLYACCLIB) $(MLYACCLIB_UIS) ptltl.grm.ui $<
+
+PtltlToken.uo: PtltlToken.sml PtltlTokens.uo ptltl.grm.uo PtltlTree.uo
+	$(HOLMOSMLC) -c -I $(MLYACCLIB) $(MLYACCLIB_UIS) ptltl.grm.ui $<
+
+ptltl.lex.sml: ptltl.lex
+	$(protect $(HOLDIR)/tools/mllex/mllex.exe) $<
+
+ptltl.lex.uo: ptltl.lex.sml PtltlToken.uo PtltlTree.uo
+	$(HOLMOSMLC) -toplevel -c PtltlTree.uo ptltl.grm-sig.ui $<
+
+PtltlCharStream.uo: PtltlCharStream.sml ptltl.lex.uo
+	$(HOLMOSMLC) -toplevel -c PtltlTree.uo ptltl.grm-sig.ui ptltl.lex.uo $<
+
+synthesize.uo: PtltlCharStream.uo PtltlTokenStream.uo
+
+synthesize.exe: synthesize.uo
+	$(protect $(HOLDIR)/bin/buildheap) synthesize.uo -o $@ --exe main
+
+../../specs/ptltl/spec_1.pt.dfa.cml.sexp: synthesize.exe
+	./synthesize.exe --dfa ../../specs/ptltl/spec_1.pt
+
+../../specs/ptltl/spec_1.pt.dfa.S: ../../specs/ptltl/spec_1.pt.dfa.cml.sexp 
+	$(CAKE)/cake --sexp=true < ../../specs/ptltl/spec_1.pt.dfa.cml.sexp > ../../specs/ptltl/spec_1.pt.dfa.S;
+
+../../specs/ptltl/spec_1.pt.dfa.exe: ../../specs/ptltl/spec_1.pt.dfa.S
+	cc -o ../../specs/ptltl/spec_1.pt.dfa.exe $(CAKEMLDIR)/basis/basis_ffi.c ../../specs/ptltl/spec_1.pt.dfa.S
+

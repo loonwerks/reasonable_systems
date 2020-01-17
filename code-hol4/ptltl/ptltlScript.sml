@@ -1,12 +1,18 @@
+open preamble basis;
 open HolKernel Parse boolLib bossLib lcsymtacs;
 open combinTheory pairTheory listTheory stringLib;
 
+(*
+open preamble basis MapProgTheory open ml_translatorLib ml_progLib basisFunctionsLib ml_translatorTheory cfTacticsBaseLib cfDivTheory cfDivLib charsetTheory regexpTheory regexp_compilerTheory;
+*)
+
+open ml_translatorLib;
+open ml_progLib;
+open fromSexpTheory astToSexprLib;
+
 val _ = new_theory "ptltl";
 
-Datatype
- `formula
-   = Id string
-   | Prim bool
+Datatype `formula = Eid string | Prim bool
    | Imp formula formula
    | Equiv formula formula
    | Or formula formula
@@ -23,13 +29,15 @@ Datatype
 
 
 Definition other_elm_def :
- other_elm = K F
+ other_elm : string -> bool = K F
 End
+
 
 (*---------------------------------------------------------------------------*)
 (* Start and End clauses are expanded versions of the original. Need an      *)
 (* extra congruence rule to extract the right termination conditions         *)
 (*---------------------------------------------------------------------------*)
+
 
 val _ = DefnBase.add_cong LEFT_AND_CONG;
 
@@ -40,7 +48,7 @@ Definition verify_def :
           else (HD trace, TL trace))
    in
     case form
-     of Id str      => elm str
+     of Eid eid      => elm eid 
       | Prim b      => b
       | Not f       => ~verify trace f
       | Imp f1 f2   => (verify trace f1 ==> verify trace f2)
@@ -76,7 +84,7 @@ End
 
 Definition mk_subforms_def :
   mk_subforms form = (case form
-  of Id str => [Id str]
+  of Eid eid => [Eid eid]
    | Prim b => [Prim b]
    | Imp f1 f2 =>
        Imp f1 f2 :: (mk_subforms f1) ++ (mk_subforms f2)
@@ -103,65 +111,67 @@ Definition mk_subforms_def :
    | Not f =>
        Not f :: (mk_subforms f)
   )
+
 End
 
 
 Definition decide_formula_start_def :
- decide_formula_start fm state elm =
-  (case fm
-    of Id str     => elm str
+ decide_formula_start fm st elm =
+  (case fm of
+      Eid eid     => elm eid
     | Prim b      => b
-    | Not f       => ~state f
-    | Imp f1 f2   => ~(state f1 \/ state f2)
-    | Equiv f1 f2 => (state f1 = state f2)
-    | Or f1 f2    => (state f1 \/ state f2)
-    | Xor f1 f2   => ~(state f1 = state f2)
-    | And f1 f2   => (state f1 /\ state f2)
-    | Since f1 f2 => (state f1 /\ state f2)
-    | Histor f    => state f
-    | Once f      => state f
-    | Prev f      => state f
+    | Not f       => ~st f
+    | Imp f1 f2   => (~ st f1) \/ st f2
+    | Equiv f1 f2 => (st f1 = st f2)
+    | Or f1 f2    => (st f1 \/ st f2)
+    | Xor f1 f2   => ~(st f1 = st f2)
+    | And f1 f2   => (st f1 /\ st f2)
+    | Since f1 f2 => (st f1 /\ st f2)
+    | Histor f    => st f
+    | Once f      => st f
+    | Prev f      => st f
     | Start f     => F
     | End f       => F
   )
 End
 
+
 Definition decide_formula_def :
- decide_formula fm state state_acc elm =
+ decide_formula fm st st_acc elm =
   (case fm of
-     Id str => elm str
+     Eid eid => elm eid 
    | Prim b => b
-   | Not f  => ~state_acc f
-   | Imp f1 f2   => (~state_acc f1 \/ state_acc f2)
-   | Equiv f1 f2 => (state_acc f1 = state_acc f2)
-   | Or f1 f2    => (state_acc f1 \/ state_acc f2)
-   | Xor f1 f2   => ~(state_acc f1 = state_acc f2)
-   | And f1 f2   => (state_acc f1 /\ state_acc f2)
-   | Since f1 f2 => (state_acc f2 \/ (state_acc f1 /\ state (Since f1 f2)))
-   | Histor f    => (state_acc f /\ state (Histor f))
-   | Once f      => (state_acc f \/ state (Once f))
-   | Prev f      => state f
-   | Start f     => (state_acc f /\ ~state f)
-   | End f       => (~state_acc f /\ state f)
+   | Not f  => ~st_acc f
+   | Imp f1 f2   => (~st_acc f1) \/ st_acc f2
+   | Equiv f1 f2 => (st_acc f1 = st_acc f2)
+   | Or f1 f2    => (st_acc f1 \/ st_acc f2)
+   | Xor f1 f2   => ~(st_acc f1 = st_acc f2)
+   | And f1 f2   => (st_acc f1 /\ st_acc f2)
+   | Since f1 f2 => (st_acc f2 \/ (st_acc f1 /\ st (Since f1 f2)))
+   | Histor f    => (st_acc f /\ st (Histor f))
+   | Once f      => (st_acc f \/ st (Once f))
+   | Prev f      => st f
+   | Start f     => (st_acc f /\ ~st f)
+   | End f       => (~st_acc f /\ st f)
  )
 End
 
 Definition transition_start_def :
  transition_start sforms elm =
    FOLDL
-     (\state_acc fm.
-         let decision = decide_formula_start fm state_acc elm
-         in (\fm'. if fm = fm' then decision else (state_acc fm')))
+     (\st_acc fm.
+         let decision = decide_formula_start fm st_acc elm
+         in (\fm'. if fm = fm' then decision else (st_acc fm')))
      empty_state
      sforms
 End
 
 Definition transition_def:
- transition sforms state elm =
+ transition sforms st elm =
    FOLDL
-     (\state_acc fm.
-         let decision = decide_formula fm state state_acc elm
-         in (\fm'. if fm = fm' then decision else (state_acc fm')))
+     (\st_acc fm.
+         let decision = decide_formula fm st st_acc elm
+         in (\fm'. if fm = fm' then decision else (st_acc fm')))
       empty_state
       sforms
 End
@@ -174,27 +184,18 @@ Definition mk_transitions_def :
 End
 
 Definition dfa_loop_def :
- dfa_loop delta form elms state =
+ dfa_loop delta form elms st =
    (case elms
-     of [] => state form
-      | elm :: elms' => dfa_loop delta form elms' (delta state elm))
+     of [] => st form
+      | elm :: elms' => dfa_loop delta form elms' (delta st elm))
 End
 
 Definition to_dfa_def :
  to_dfa form =
-   let (transition_start, transition) = mk_transitions form;
+   let (delta_start, delta) = mk_transitions form;
    in \elms. case elms
-              of [] => dfa_loop transition form [] (transition_start other_elm)
-               | elm :: elms' => dfa_loop transition form elms' (transition_start elm)
+              of [] => (delta_start other_elm) form 
+               | elm :: elms' => dfa_loop delta form elms' (delta_start elm)
 End
 
 val _ = export_theory();
-
-
-(* ****interactive proof scrap work: *****
-val TODO_def = Hol_defn "TODO" `
-
-
-`
-Defn.tgoal TODO_def
-*)

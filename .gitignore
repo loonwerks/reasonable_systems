@@ -8,5 +8,6 @@ bin/**
 **.yacc.sml
 **.graph
 **.graph.png
-
+**.lexicon
+**.gram
 
