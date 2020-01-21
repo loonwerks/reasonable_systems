@@ -10,13 +10,13 @@ fun main () = (let
 
 val flagMapRef =
   ref [
-    ("--lex", false),
-    ("--gram", false),
-    ("--bigstep", false),
-    ("--dfa", false),
-    ("--graph", false),
-    ("--monitor", false),
-    ("--help", false)
+    ("lex", false),
+    ("gram", false),
+    ("bigstep", false),
+    ("dfa", false),
+    ("graph", false),
+    ("monitor", false),
+    ("help", false)
   ]
 
 fun printHelp () = (
@@ -24,13 +24,13 @@ fun printHelp () = (
    "Usage: synthesize [options]\n" ^
    "\n" ^
    "Options: \n" ^
-   "  --lex <spec.pt>\n" ^
-   "  --gram <spec.pt>\n"^
-   "  --bigstep <spec.pt>\n"^
-   "  --dfa <spec.pt>\n"^
-   "  --graph <spec.pt>\n"^
-   "  --monitor <spec.pt>\n"^
-   "  --help \n"^
+   "  lex <spec.pt>\n" ^
+   "  gram <spec.pt>\n"^
+   "  bigstep <spec.pt>\n"^
+   "  dfa <spec.pt>\n"^
+   "  graph <spec.pt>\n"^
+   "  monitor <spec.pt>\n"^
+   "  help \n"^
    "\n"
   )
 )
@@ -109,10 +109,54 @@ end)
 *)
 
 
+<<<<<<< HEAD
+val common_hol_defs =  [
+  K_DEF,
+  NULL_DEF,
+  HD,
+  TL_DEF,
+  FOLDL,
+  REVERSE_DEF,
+  IN_DEF,
+  LIST_TO_SET_DEF,
+  nub_def,
+  FST,
+  SND,
+  SPLITP,
+  FILTER,
+  MAP,
+  TOKENS_def,
+  other_elm_def,
+  empty_state_def,
+  mk_subforms_def,
+  decide_formula_start_def,
+  decide_formula_def,
+  transition_start_def,
+  transition_def,
+  mk_transitions_def,
+  dfa_loop_def,
+  mk_elm_def,
+  mk_trace_def
+]
+
+
+=======
+>>>>>>> origin/master
 fun dfa [filename]  = (let
   val inStream = readFile filename
   val tokenStream = PtltlCharStream.makeTokenStream (readStream inStream)
   val (form, rem) = PtltlTokenStream.parse (15, tokenStream, printError filename)  
+<<<<<<< HEAD
+  val () = TextIO.closeIn inStream
+
+  val hol_form = PtltlTree.to_hol_form form
+  val hol_dfa_term = EVAL (SPEC hol_form to_dfa_def |> concl |> rhs) |> concl |> rhs;
+  val hol_dfa_def = Define `dfa = ^hol_dfa_term`;
+
+  (* translate HOL to CakeML*)
+  val _ = map (fn hol_def => translate hol_def) common_hol_defs
+  val _ = translate hol_dfa_def 
+=======
   val _ = TextIO.print ("tree: " ^ (PtltlTree.toString form))
   val () = TextIO.closeIn inStream
 
@@ -154,10 +198,27 @@ fun dfa [filename]  = (let
     mk_elm_def,
     mk_trace_def
   ]
+>>>>>>> origin/master
 
   val lib_tm = get_ml_prog_state() |> get_prog
 
   val main_tm = process_topdecs `
+<<<<<<< HEAD
+    fun main u = (let
+      val cl = CommandLine.arguments ()
+      val str = String.concatWith " " cl
+      val trace = mk_trace (String.explode str)
+      val b_result = dfa trace
+      val _ = TextIO.print (
+        if b_result then
+          "ACCEPTED!!"
+        else
+          "REJECTED!!"
+      )
+    in
+      TextIO.output1 TextIO.stdOut #"\n"
+    end)
+=======
     fun main u =
         let
           val cl = CommandLine.arguments ()
@@ -171,6 +232,7 @@ fun dfa [filename]  = (let
               "REJECTED!!"
           )
         in TextIO.output1 TextIO.stdOut #"\n" end
+>>>>>>> origin/master
   `;
 
 
@@ -188,6 +250,96 @@ in
   ()
 end)
 
+<<<<<<< HEAD
+
+fun monitor [filename]  = (let
+  val inStream = readFile filename
+  val tokenStream = PtltlCharStream.makeTokenStream (readStream inStream)
+  val (form, rem) = PtltlTokenStream.parse (15, tokenStream, printError filename)  
+  val () = TextIO.closeIn inStream
+
+  val hol_form = PtltlTree.to_hol_form form
+  val top_form_def = Define `top_form = ^hol_form`;
+
+
+  val hol_transitions_term = EVAL (SPEC hol_form mk_transitions_def |> concl |> rhs) |> concl |> rhs;
+  val hol_transitions_def = Define `transitions = ^hol_transitions_term`;
+
+  val _ = map (fn hol_def => translate hol_def) common_hol_defs
+
+  val _ = translate top_form_def 
+  val _ = translate hol_transitions_def 
+
+  val lib_tm = get_ml_prog_state() |> get_prog
+
+  val main_tm = (process_topdecs `
+    fun main u = (let
+      val (transition_start, transition) = transitions 
+
+      fun verify_trace (state_op, trace) = (case (state_op, trace) of
+     
+        (_, []) => state_op |
+
+        (None, elm :: trace') => 
+          verify_trace (Some (transition_start elm), trace') |
+
+
+        (Some state, elm :: trace') => 
+          verify_trace (Some (transition state elm), trace')
+
+      )
+
+      fun verify_input (state_op, input) = (let
+        val trace = mk_trace (String.explode input)
+        val state_op' = verify_trace (state_op, trace)
+
+        val result_string = (case state_op' of
+          None => "" |
+          Some state' =>
+            (if state' top_form  then
+              "ACCEPTED!!"
+            else
+              "REJECTED!!"
+            )
+        )
+        val _ = print (result_string ^ "\n")
+      in
+        state_op'
+      end)
+
+
+      fun repl state_op = (let
+        val _ = print "> "
+        val line_op = (TextIO.inputLine TextIO.stdIn)
+        val _ = Option.map (fn line => 
+          repl (verify_input (state_op, line))
+        ) line_op
+      in
+        ()
+      end) 
+
+    in 
+      repl None
+    end)
+
+  `);
+
+  val call_tm =
+  ``
+    (Dlet unknown_loc (Pcon NONE [])
+      (App Opapp [Var (Short "main"); Con NONE []]))
+  ``
+
+  val prog_tm = ``(^lib_tm ++ ^main_tm ++ [^call_tm])`` |> EVAL |> concl |> rhs
+  
+  val _ = write_ast_to_file (filename ^ ".monitor.cml.sexp") prog_tm;
+
+
+in
+  ()
+end)
+
+=======
 (*
 
 fun monitor [filename]  = (let
@@ -245,6 +397,7 @@ in
 end)
 
 *)
+>>>>>>> origin/master
 
 fun lookup (map, key) =
   case (List.find (fn (k, v) => k = key) map) of
@@ -262,15 +415,15 @@ fun flagSet flagMap str = (
 )
 
 fun handleRequest flagMap args = (
-  if flagSet flagMap "--lex" then lex args else ();
-  if flagSet flagMap "--gram" then gram args else ();
-  if flagSet flagMap "--dfa" then dfa args else ()
+  if flagSet flagMap "lex" then lex args else ();
+  if flagSet flagMap "gram" then gram args else ();
+  if flagSet flagMap "dfa" then dfa args else ();
+  if flagSet flagMap "monitor" then monitor args else ()
   (*
   ;
   fail ()
-  if flagSet flagMap "--bigstep" then mk_bigstep args else ();
-  if flagSet flagMap "--graph" then mk_graph args else ();
-  if flagSet flagMap "--monitor" then mk_monitor args else ()
+  if flagSet flagMap "bigstep" then mk_bigstep args else ();
+  if flagSet flagMap "graph" then mk_graph args else ();
   *)
 ) handle 
    Fail m => print ("failed : " ^ m) |
@@ -285,10 +438,7 @@ fun run () = (let
     (fn s => case (lookup (!flagMapRef, s)) of
       SOME _ => flagMapRef := (insert (!flagMapRef, s, true)) |
       NONE => (
-        if (not (String.isPrefix "--" s)) then
-          argsRef := (!argsRef) @ [s] 
-        else
-          flagMapRef := (insert (!flagMapRef, "--help", true))
+        argsRef := (!argsRef) @ [s] 
       )
     )
     (CommandLine.arguments ())
@@ -300,7 +450,7 @@ fun run () = (let
       b :: bs' => b orelse (hasTrue bs')
   
   val hasFlag = (hasTrue (map (fn (k,v) => v) (!flagMapRef)))
-  val helpReq = lookup (!flagMapRef, "--help")
+  val helpReq = lookup (!flagMapRef, "help")
 
   (** DEBUG **)
   (*
@@ -321,20 +471,6 @@ fun run () = (let
 in
   ()
 end)
-
-
-  (*
-  - read in ptltl file
-  - lex into tokens
-  - parse into tree
-  - embed tree into HOL
-  - specialize HOL machine on HOL tree
-  - embed specialized machine into CakeML
-  - construct CakeML program:
-    -- read trace input string
-    -- application of CakeML Machine to trace
-  - write out to .scake
-  *)
 
 
 in

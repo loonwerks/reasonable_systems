@@ -55,13 +55,3 @@ synthesize.uo: PtltlCharStream.uo PtltlTokenStream.uo
 
 synthesize.exe: synthesize.uo
 	$(protect $(HOLDIR)/bin/buildheap) synthesize.uo -o $@ --exe main
-
-../../specs/ptltl/spec_1.pt.dfa.cml.sexp: synthesize.exe
-	./synthesize.exe --dfa ../../specs/ptltl/spec_1.pt
-
-../../specs/ptltl/spec_1.pt.dfa.S: ../../specs/ptltl/spec_1.pt.dfa.cml.sexp 
-	$(CAKE)/cake --sexp=true < ../../specs/ptltl/spec_1.pt.dfa.cml.sexp > ../../specs/ptltl/spec_1.pt.dfa.S;
-
-../../specs/ptltl/spec_1.pt.dfa.exe: ../../specs/ptltl/spec_1.pt.dfa.S
-	cc -o ../../specs/ptltl/spec_1.pt.dfa.exe $(CAKEMLDIR)/basis/basis_ffi.c ../../specs/ptltl/spec_1.pt.dfa.S
-
