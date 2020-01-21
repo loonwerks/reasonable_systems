@@ -7,10 +7,48 @@ against specifications written in various logics, including Past Time LTL.
 Clone or download the repo.  Let's assume your local copy is in a directory called "reasonable_systems".  `cd reasonable_systems` and run `make`.  The built tools will be inside the directory `bin`.  The code targetted at mlton is in the directory `code-mlton`.  Example specifications are in `specs`.
 
 ### Prerequisites
-Make sure you have MLton (http://mlton.org/) installed.
+PolyML - https://www.polyml.org/
+HOL4 - https://hol-theorem-prover.org/
+CakeML - https://cakeml.org/
+MLton - http://mlton.org/
+
+### code-hol4 PTLTL
+The specification `histor ((b --> prev (~b since a)) /\ ~(a /\ b))` is stored in `specs/ptltl/spec_1.pt`.  It says that if there is a `b` then the preceding tokens since an `a` are not `b`s, and their was certainly a preceding `a`.  Additionally, `a` and `b` cannot occur simultaneously.
+
+# build step
+```bash
+$ cd code-hol4/ptltl
+$ Holmake
+```
+# synthesis step
+```bash
+$ ./synthesize.sh monitor ../../specs/spec_1.p1
+```
+multiple kinds of artifacts may be synthesized using the keywords `lex`, `gram`, `dfa`, and `monitor`.
+for each of `dfa`, and `monitor`, 3 kinds of artifacts are produced with extensions `.cakeml.sexp`, `.S`, and `.exe`.
+
+# run step
+```bash
+$ ../../specs/spec_1.p1.monitor.exe
+> a a a
+ACCEPTED
+> a b
+ACCEPTED
+> a b.c a.c
+ACCEPTED
+> b
+ACCEPTED
+> b
+REJECTED
+> a a a
+REJECTED
+```
 
 
-### PTLTL
+
+The DFA synthesis is based on Havelund/Rosu's ["Synthesizing Monitors for Safety Properties"](https://ti.arc.nasa.gov/m/pub-archive/345h/0345%20(Havelund).pdf)
+
+### code-mlton PTLTL
 The specification `histor ((b --> prev (~b since a)) /\ ~(a /\ b))` is stored in `specs/ptltl/spec_1.pt`.  It says that if there is a `b` then the preceding tokens since an `a` are not `b`s, and their was certainly a preceding `a`.  Additionally, `a` and `b` cannot occur simultaneously.
 
 The following sorts of commands are possible with the `ptltl` program:
