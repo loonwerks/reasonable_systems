@@ -7,10 +7,10 @@ against specifications written in various logics, including Past Time LTL.
 Clone or download the repo.  Let's assume your local copy is in a directory called "reasonable_systems".  `cd reasonable_systems` and run `make`.  The built tools will be inside the directory `bin`.  The code targetted at mlton is in the directory `code-mlton`.  Example specifications are in `specs`.
 
 ### Prerequisites
-PolyML - https://www.polyml.org/
-HOL4 - https://hol-theorem-prover.org/
-CakeML - https://cakeml.org/
-MLton - http://mlton.org/
+PolyML - https://www.polyml.org/  
+HOL4 - https://hol-theorem-prover.org/  
+CakeML - https://cakeml.org/  
+MLton - http://mlton.org/  
 
 ### code-hol4 PTLTL
 The specification `histor ((b --> prev (~b since a)) /\ ~(a /\ b))` is stored in `specs/ptltl/spec_1.pt`.  It says that if there is a `b` then the preceding tokens since an `a` are not `b`s, and their was certainly a preceding `a`.  Additionally, `a` and `b` cannot occur simultaneously.
