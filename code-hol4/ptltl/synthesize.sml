@@ -109,7 +109,6 @@ end)
 *)
 
 
-<<<<<<< HEAD
 val common_hol_defs =  [
   K_DEF,
   NULL_DEF,
@@ -140,13 +139,10 @@ val common_hol_defs =  [
 ]
 
 
-=======
->>>>>>> origin/master
 fun dfa [filename]  = (let
   val inStream = readFile filename
   val tokenStream = PtltlCharStream.makeTokenStream (readStream inStream)
   val (form, rem) = PtltlTokenStream.parse (15, tokenStream, printError filename)  
-<<<<<<< HEAD
   val () = TextIO.closeIn inStream
 
   val hol_form = PtltlTree.to_hol_form form
@@ -156,54 +152,10 @@ fun dfa [filename]  = (let
   (* translate HOL to CakeML*)
   val _ = map (fn hol_def => translate hol_def) common_hol_defs
   val _ = translate hol_dfa_def 
-=======
-  val _ = TextIO.print ("tree: " ^ (PtltlTree.toString form))
-  val () = TextIO.closeIn inStream
-
-  val hol_form = PtltlTree.to_hol_form form
-
-  val hol_dfa_term = EVAL (SPEC hol_form to_dfa_def |> concl |> rhs) |> concl |> rhs;
-
-  val hol_dfa_def = Define `dfa = ^hol_dfa_term`;
-
-
-  (* compile HOL to CakeML*)
-  
-  val _ = map (fn hol_def => translate hol_def) [ 
-    K_DEF,
-    NULL_DEF,
-    HD,
-    TL_DEF,
-    FOLDL,
-    REVERSE_DEF,
-    IN_DEF,
-    LIST_TO_SET_DEF,
-    nub_def,
-    FST,
-    SND,
-    SPLITP,
-    FILTER,
-    MAP,
-    TOKENS_def,
-    other_elm_def,
-    empty_state_def,
-    mk_subforms_def,
-    decide_formula_start_def,
-    decide_formula_def,
-    transition_start_def,
-    transition_def,
-    mk_transitions_def,
-    dfa_loop_def,
-    hol_dfa_def,
-    mk_elm_def,
-    mk_trace_def
-  ]
->>>>>>> origin/master
 
   val lib_tm = get_ml_prog_state() |> get_prog
 
   val main_tm = process_topdecs `
-<<<<<<< HEAD
     fun main u = (let
       val cl = CommandLine.arguments ()
       val str = String.concatWith " " cl
@@ -218,21 +170,6 @@ fun dfa [filename]  = (let
     in
       TextIO.output1 TextIO.stdOut #"\n"
     end)
-=======
-    fun main u =
-        let
-          val cl = CommandLine.arguments ()
-          val str = String.concatWith " " cl
-          val trace = mk_trace (String.explode str)
-          val b_result = dfa trace
-          val _ = TextIO.print (
-            if b_result then
-              "ACCEPTED!!"
-            else
-              "REJECTED!!"
-          )
-        in TextIO.output1 TextIO.stdOut #"\n" end
->>>>>>> origin/master
   `;
 
 
@@ -249,8 +186,6 @@ fun dfa [filename]  = (let
 in
   ()
 end)
-
-<<<<<<< HEAD
 
 fun monitor [filename]  = (let
   val inStream = readFile filename
@@ -339,65 +274,6 @@ in
   ()
 end)
 
-=======
-(*
-
-fun monitor [filename]  = (let
-  val inStream = readFile filename
-  val tokenStream = CharStream.makeTokenStream (readStream inStream)
-  val (form, rem) = TokenStream.parse (15, tokenStream, printError filename)  
-  val () = TextIO.closeIn inStream
-
-
-  val (transition_start, transition) = Tree.mk_transitions form
-
-  fun verify_trace (state_op, trace) = (case (state_op, trace) of
-
-    (_, []) => state_op |
-
-    (NONE, elm :: trace') => 
-      verify_trace (SOME (transition_start elm), trace') |
-
-    (SOME state, elm :: trace') => 
-      verify_trace (SOME (transition (state, elm)), trace')
-
-  )
-
-  fun verify_input (state_op, input) = (let
-    val trace = Trace.mk_trace input 
-    val state_op' = verify_trace (state_op, trace)
-    val result_string = (case state_op' of
-      NONE => "" |
-      SOME state' =>
-        (if state' form then
-          "ACCEPTED"
-        else
-          "REJECTED"
-        )
-    )
-    val _ = print (result_string ^ "\n")
-  in
-    state_op'
-  end)
-
-
-  fun repl state_op = (let
-    val _ = print "> "
-    val input_op = TextIO.inputLine TextIO.stdIn
-  in
-    (case input_op of
-      NONE => () |
-      SOME input => 
-        repl (verify_input (state_op, input))
-    )
-  end)
-
-in
-  repl (NONE)
-end)
-
-*)
->>>>>>> origin/master
 
 fun lookup (map, key) =
   case (List.find (fn (k, v) => k = key) map) of
