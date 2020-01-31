@@ -11,19 +11,11 @@ open fromSexpTheory astToSexprLib;
 
 open ptltlTheory
 
+
 val _ = new_theory "trace";
 
 Definition mk_elm_def :
-  mk_elm (str : string) =
-  let elm_id_list = (TOKENS (\ c . c = #".") str);
-      elm = (FOLDL
-        (\elm_fn_acc elm_id .
-          (\ (id : string) . (elm_id = id) \/ (elm_fn_acc id))
-        )
-        (\ (id : string) . F)
-        (elm_id_list : string list)
-      );
-  in elm
+  mk_elm (str : string) = (TOKENS (\ c . c = #".") str)
 End
 
 Definition mk_trace_def :
@@ -32,5 +24,6 @@ Definition mk_trace_def :
       trimmed_elm_str_list = FILTER (\str . str <> "") elm_str_list; 
   in (MAP mk_elm trimmed_elm_str_list)
 End
+
 
 val _ = export_theory();
