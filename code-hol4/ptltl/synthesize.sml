@@ -1,10 +1,17 @@
 open preamble basis 
-
 open ml_translatorLib;
 open ml_progLib;
 open fromSexpTheory astToSexprLib;
+open HolKernel Parse boolLib bossLib lcsymtacs;
+open combinTheory pairTheory listTheory stringLib;
 
 open ptltlTheory traceTheory
+
+
+
+
+
+
 
 fun main () = (let
 
@@ -238,27 +245,35 @@ fun tablestep_monitor [filename]  = (let
   val tokenStream = PtltlCharStream.makeTokenStream (readStream inStream)
   val (form, rem) = PtltlTokenStream.parse (15, tokenStream, printError filename)  
   val () = TextIO.closeIn inStream
-  val top_form_def = Define `top_form = ^(PtltlTree.to_hol_form form)`;
+
+  val top_form_term = (PtltlTree.to_hol_form form)
+
+  val relational_data_term = (
+    ``mk_relational_data (^top_form_term)``
+  ) |> EVAL |> concl |> rhs
+
+  val table_data_term = (
+    ``mk_table_data (^relational_data_term)``
+  ) (* |> EVAL |> concl |> rhs ---- TODO: figure out problem with early stage evaluation *)
+
+  val table_data_def = Define `table_data = ^table_data_term`;
 
   val _ = map (fn hol_def => translate hol_def) common_hol_defs
-  val _ = translate top_form_def;
   val _ = translate extract_ids_def;
   val _ = translate mk_power_list_def;
   val _ = translate LENGTH;
   val _ = translate find_reachable_edges_def;
   val _ = translate mk_relational_data_def;
   val _ = translate mk_table_data_def;
-  val _ = translate table_transition_def 
+  val _ = translate table_transition_def;
+  val _ = translate table_data_def;
 
   val lib_tm = get_ml_prog_state() |> get_prog
 
   val main_tm = (process_topdecs `
     fun main u = (let
 
-      val (state_to_index, (elm_to_idx, (finals, (table, start_idx)))) = (
-        mk_table_data (mk_relational_data top_form)
-      )
-
+      val (state_to_index, (elm_to_idx, (finals, (table, start_idx)))) = table_data
 
       fun verify_trace (state_idx, trace) = (case trace of
         [] => state_idx |
