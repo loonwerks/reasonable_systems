@@ -222,7 +222,7 @@ Definition  mk_power_list_def :
    let
      rm = (mk_power_list xs');
    in
-     (MAP (\ l . x :: l) rm) ++ rm 
+     rm ++ (MAP (\ l . x :: l) rm)
  )
 End
 
@@ -284,7 +284,7 @@ Definition mk_relational_data_def :
   mk_relational_data form = (let
 
     ids = extract_ids form;
-    elms = (mk_power_list ids) ++ [other_elm];
+    elms = (mk_power_list ids);
 
     subforms = REVERSE (nub (mk_subforms form));
     delta_start = transition_start subforms;
@@ -313,7 +313,7 @@ Definition mk_table_data_def :
 
     elm_to_index = (\ elm . case (INDEX_FIND 0 (elm_equal elm) elms) of
       SOME (i, _ ) => i |
-      NONE => reject_idx
+      NONE => 0 
     );
     
     state_to_index = (\ st . case (INDEX_OF st expl_states) of
