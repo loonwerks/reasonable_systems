@@ -222,7 +222,7 @@ Definition  mk_power_list_def :
    let
      rm = (mk_power_list xs');
    in
-     rm ++ (MAP (\ l . x :: l) rm)
+     (MAP (\ l . x :: l) rm) ++ rm
  )
 End
 
@@ -306,14 +306,15 @@ Definition mk_table_data_def :
     start_idx = reject_idx + 1;
     finals = (MAP (\ st . MEM st accept_states) expl_states) ++ [F; F];
 
-    elm_equal = (\ elm1 elm2 .
-      (EVERY (\ id . MEM id elm2) elm1) /\
+    elm_contains = (\ elm1 elm2 .
+      (* elm1 contains elm2 *)
       (EVERY (\ id . MEM id elm1) elm2)
     );
 
-    elm_to_index = (\ elm . case (INDEX_FIND 0 (elm_equal elm) elms) of
+    empty_index = LENGTH elms - 1;
+    elm_to_index = (\ elm . case (INDEX_FIND 0 (elm_contains elm) elms) of
       SOME (i, _ ) => i |
-      NONE => 0 
+      NONE => empty_index
     );
     
     state_to_index = (\ st . case (INDEX_OF st expl_states) of
