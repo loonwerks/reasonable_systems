@@ -165,9 +165,9 @@ fun bigstep [filename]  = (let
       val b_result = spec_bigstep trace
       val _ = TextIO.print (
         if b_result then
-          "ACCEPTED!!"
+          "ACCEPTED"
         else
-          "REJECTED!!"
+          "REJECTED"
       )
     in
       TextIO.output1 TextIO.stdOut #"\n"
@@ -213,9 +213,9 @@ fun smallstep [filename]  = (let
       val b_result = spec_smallstep trace
       val _ = TextIO.print (
         if b_result then
-          "ACCEPTED!!"
+          "ACCEPTED"
         else
-          "REJECTED!!"
+          "REJECTED"
       )
     in
       TextIO.output1 TextIO.stdOut #"\n"
@@ -291,9 +291,9 @@ fun tablestep_monitor [filename]  = (let
 
         val result_string = 
           (if (List.nth finals state_idx') then
-            "ACCEPTED!!"
+            "ACCEPTED"
           else
-            "REJECTED!!"
+            "REJECTED"
           )
         val _ = print (result_string ^ "\n")
       in
@@ -381,9 +381,9 @@ fun smallstep_monitor [filename]  = (let
           None => "" |
           Some state' =>
             (if List.exists (fn subform => subform = top_form) state'  then
-              "ACCEPTED!!"
+              "ACCEPTED"
             else
-              "REJECTED!!"
+              "REJECTED"
             )
         )
         val _ = print (result_string ^ "\n")

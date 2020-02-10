@@ -378,7 +378,15 @@ Definition to_dotgraph_def :
     ) start_edges);
 
     edge_labels = start_edge_labels ++ (MAP (\ (st, elm, st') .
-      (mk_label st, concat_with "." elm, mk_label st')
+      (
+        mk_label st,
+        (if (elm = []) then
+          "_"
+        else 
+          (concat_with "." elm)
+        ),
+        mk_label st'
+      )
     ) edges);
 
     graph_str = (
