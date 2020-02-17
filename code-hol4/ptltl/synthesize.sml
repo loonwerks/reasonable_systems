@@ -256,6 +256,32 @@ fun tablestep_monitor [filename]  = (let
     ``mk_table_data (^relational_data_term)``
   ) (* |> EVAL |> concl |> rhs ---- TODO: figure out problem with early stage evaluation *)
 
+
+
+  val (dir_name, just_filename) = (let
+    val path = OS.FileSys.fullPath filename
+    val toks = (String.tokens (fn c => c = #"/") path)
+    val prefix = List.take (toks, (List.length toks) - 1)
+    val dir_name = "/" ^ (String.concatWith "/" prefix)
+    val just_filename = List.last toks
+  in
+    (dir_name, just_filename)
+  end)
+
+
+  val _ = OS.FileSys.chDir dir_name
+
+  val thy_name = (String.translate (fn c =>
+    if c = #"." then
+      "_"
+    else
+      (Char.toString c)
+  ) (just_filename ^ "_tablestep_monitor"))
+
+
+  (*** NEW THEORY ***)
+  val _ = new_theory thy_name
+
   val table_data_def = Define `table_data = ^table_data_term`;
 
   val _ = map (fn hol_def => translate hol_def) common_hol_defs
@@ -267,6 +293,10 @@ fun tablestep_monitor [filename]  = (let
   val _ = translate mk_table_data_def;
   val _ = translate table_transition_def;
   val _ = translate table_data_def;
+
+  val _ = export_theory();
+  (*** EXPORT THEORY ***)
+
 
   val lib_tm = get_ml_prog_state() |> get_prog
 
