@@ -1,16 +1,5 @@
-open preamble basis;
 open HolKernel Parse boolLib bossLib lcsymtacs;
 open combinTheory pairTheory listTheory stringLib;
-open ASCIInumbersTheory;
-open polyTheory;
-
-(*
-open preamble basis MapProgTheory open ml_translatorLib ml_progLib basisFunctionsLib ml_translatorTheory cfTacticsBaseLib cfDivTheory cfDivLib charsetTheory regexpTheory regexp_compilerTheory;
-*)
-
-open ml_translatorLib;
-open ml_progLib;
-open fromSexpTheory astToSexprLib;
 
 val _ = new_theory "ptltl";
 
@@ -33,7 +22,7 @@ Datatype `formula =
 
 
 Definition other_elm_def :
- other_elm : string list = [] 
+ other_elm : string list = []
 End
 
 
@@ -41,7 +30,6 @@ End
 (* Start and End clauses are expanded versions of the original. Need an      *)
 (* extra congruence rule to extract the right termination conditions         *)
 (*---------------------------------------------------------------------------*)
-
 
 val _ = DefnBase.add_cong LEFT_AND_CONG;
 
@@ -52,7 +40,7 @@ Definition bigstep_def :
           else (HD trace, TL trace))
    in
     case form
-     of Eid eid      => MEM eid elm 
+     of Eid eid     => MEM eid elm
       | Prim b      => b
       | Not f       => ~bigstep f trace
       | Imp f1 f2   => (bigstep f1 trace ==> bigstep f2 trace)
@@ -84,7 +72,7 @@ End
 (* state machine *)
 
 Definition empty_state_def :
- empty_state = [] 
+ empty_state = []
 End
 
 Definition mk_subforms_def :
@@ -120,11 +108,10 @@ Definition mk_subforms_def :
 End
 
 
-
 Definition decide_formula_start_def :
  decide_formula_start fm st elm =
   (case fm of
-      Eid eid     => MEM eid elm 
+      Eid eid     => MEM eid elm
     | Prim b      => b
     | Not f       => ~MEM f st
     | Imp f1 f2   => (~ MEM f1 st) \/ MEM f2 st
@@ -144,7 +131,7 @@ End
 Definition decide_formula_def :
  decide_formula fm st st_acc elm =
   (case fm of
-     Eid eid => MEM eid elm 
+     Eid eid => MEM eid elm
    | Prim b => b
    | Not f  => ~MEM f st_acc
    | Imp f1 f2   => (~MEM f1 st_acc) \/ MEM f2 st_acc
@@ -162,8 +149,6 @@ Definition decide_formula_def :
 End
 
 
-
-
 Definition transition_start_def :
  transition_start sforms elm =
    FOLDL
@@ -178,7 +163,6 @@ Definition transition_start_def :
      empty_state
      sforms
 End
-
 
 Definition transition_def:
  transition sforms st elm =
@@ -213,8 +197,6 @@ Definition smallstep_def :
               of [] => MEM form (delta_start other_elm)
                | elm :: elms' => dfa_loop delta form elms' (delta_start elm)
 End
-
-
 
 Definition  mk_power_list_def :
  (mk_power_list [] = [[]]) /\
@@ -288,7 +270,7 @@ Definition mk_relational_data_def :
     elms = (if has_par_evts then
       par_elms
     else
-      FILTER (\ elm . LENGTH elm = 1) par_elms 
+      FILTER (\ elm . LENGTH elm = 1) par_elms
     );
 
     subforms = REVERSE (nub (mk_subforms form));
@@ -321,7 +303,7 @@ Definition mk_table_data_def :
       SOME (i, _ ) => i |
       NONE => empty_index
     );
-    
+
     state_to_index = (\ st . case (INDEX_OF st expl_states) of
       SOME i => i |
       NONE => reject_idx
@@ -344,19 +326,19 @@ Definition mk_table_data_def :
     ) elms);
 
     table = rows ++ [reject_row; start_row];
-      
+
   in
     (state_to_index, elm_to_index, finals, table, start_idx)
   )
 
 End
 
-
 Definition table_transition_def:
   table_transition table state_idx elm_idx = EL elm_idx (EL state_idx table)
 End
 
 
+(* This should stay at the SML level
 Definition to_dotgraph_def :
   to_dotgraph (expl_states, elms, accept_states, start_edges, edges) = (let
 
@@ -387,7 +369,7 @@ Definition to_dotgraph_def :
         mk_label st,
         (if (elm = []) then
           "_"
-        else 
+        else
           (concat_with "." elm)
         ),
         mk_label st'
@@ -396,9 +378,9 @@ Definition to_dotgraph_def :
 
     graph_str = (
       "digraph finite_state_machine {\n" ++
-      "  rankdir = LR;\n" ++ 
+      "  rankdir = LR;\n" ++
       "  node [shape = circle]; \"" ++ start_state_str ++ "\";\n" ++
-      (if (NULL accept_states) then "" else 
+      (if (NULL accept_states) then "" else
       "  node [shape = doublecircle]; " ++
            (concat_with "; " accept_state_labels) ++ ";\n"
       ) ++
@@ -414,5 +396,6 @@ Definition to_dotgraph_def :
     graph_str
   )
 End
+*)
 
 val _ = export_theory();
