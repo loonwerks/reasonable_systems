@@ -281,10 +281,15 @@ WF_REL_TAC `measure (
 End
 
 Definition mk_relational_data_def :
-  mk_relational_data form = (let
+  mk_relational_data form has_par_evts = (let
 
     ids = extract_ids form;
-    elms = (mk_power_list ids);
+    par_elms = (mk_power_list ids);
+    elms = (if has_par_evts then
+      par_elms
+    else
+      FILTER (\ elm . LENGTH elm = 1) par_elms 
+    );
 
     subforms = REVERSE (nub (mk_subforms form));
     delta_start = transition_start subforms;

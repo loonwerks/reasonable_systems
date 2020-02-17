@@ -23,7 +23,7 @@ val flagMapRef =
     ("smallstep", false),
     ("dotgraph", false),
     ("smallstep_monitor", false),
-    ("tablestep_monitor", false),
+    ("dfa_monitor", false),
     ("help", false)
   ]
 
@@ -37,7 +37,7 @@ fun printHelp () = (
    "  bigstep <spec.pt>\n"^
    "  smallstep <spec.pt>\n"^
    "  smallstep_monitor <spec.pt>\n"^
-   "  tablestep_monitor <spec.pt>\n"^
+   "  dfa_monitor <spec.pt>\n"^
    "  dotgraph <spec.pt>\n"^
    "  help \n"^
    "\n"
@@ -239,7 +239,7 @@ end)
 
 
 
-fun tablestep_monitor [filename]  = (let
+fun dfa_monitor [filename]  = (let
 
   val inStream = readFile filename
   val tokenStream = PtltlCharStream.makeTokenStream (readStream inStream)
@@ -249,7 +249,7 @@ fun tablestep_monitor [filename]  = (let
   val top_form_term = (PtltlTree.to_hol_form form)
 
   val relational_data_term = (
-    ``mk_relational_data (^top_form_term)``
+    ``mk_relational_data (^top_form_term) T``
   ) |> EVAL |> concl |> rhs
 
   val table_data_term = (
@@ -276,7 +276,7 @@ fun tablestep_monitor [filename]  = (let
       "_"
     else
       (Char.toString c)
-  ) (just_filename ^ "_tablestep_monitor"))
+  ) (just_filename ^ "_dfa_monitor"))
 
 
   (*** NEW THEORY ***)
@@ -357,7 +357,7 @@ fun tablestep_monitor [filename]  = (let
 
   val prog_tm = ``(^lib_tm ++ ^main_tm ++ [^call_tm])`` |> EVAL |> concl |> rhs
 
-  val _ = write_ast_to_file (filename ^ ".tablestep_monitor.cml.sexp") prog_tm
+  val _ = write_ast_to_file (filename ^ ".dfa_monitor.cml.sexp") prog_tm
 
 in
   ()
@@ -459,8 +459,8 @@ fun dotgraph [filename]  = (let
   val (form, rem) = PtltlTokenStream.parse (15, tokenStream, printError filename)  
   val () = TextIO.closeIn inStream
 
-  val _ = print "... graph search in HOL4 ..."
-  val dotgraph_term = ``to_dotgraph (mk_relational_data ^(PtltlTree.to_hol_form form))`` |> EVAL |> concl |> rhs
+  val _ = print "... DFA concretization HOL4 ..."
+  val dotgraph_term = ``to_dotgraph (mk_relational_data ^(PtltlTree.to_hol_form form) F)`` |> EVAL |> concl |> rhs
   val _ = print " completed\n"
 
   val graph_str = stringSyntax.fromHOLstring dotgraph_term 
@@ -498,7 +498,7 @@ fun handleRequest flagMap args = (
     ("gram", gram),
     ("smallstep", smallstep),
     ("smallstep_monitor", smallstep_monitor),
-    ("tablestep_monitor", tablestep_monitor),
+    ("dfa_monitor", dfa_monitor),
     ("dotgraph", dotgraph)
   ]
 ) handle 
