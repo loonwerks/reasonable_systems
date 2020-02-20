@@ -256,8 +256,6 @@ fun dfa_monitor [filename]  = (let
     ``mk_table_data (^relational_data_term)``
   ) (* |> EVAL |> concl |> rhs ---- TODO: figure out problem with early stage evaluation *)
 
-
-
   val (dir_name, just_filename) = (let
     val path = OS.FileSys.fullPath filename
     val toks = (String.tokens (fn c => c = #"/") path)
@@ -358,6 +356,141 @@ fun dfa_monitor [filename]  = (let
   val prog_tm = ``(^lib_tm ++ ^main_tm ++ [^call_tm])`` |> EVAL |> concl |> rhs
 
   val _ = write_ast_to_file (filename ^ ".dfa_monitor.cml.sexp") prog_tm
+
+in
+  ()
+end)
+
+
+fun default [filename]  = (let
+
+  val inStream = readFile filename
+  val tokenStream = PtltlCharStream.makeTokenStream (readStream inStream)
+  val (form, rem) = PtltlTokenStream.parse (15, tokenStream, printError filename)  
+  val () = TextIO.closeIn inStream
+
+  val top_form_term = (PtltlTree.to_hol_form form)
+
+  val relational_data_term = (
+    ``mk_relational_data (^top_form_term) F``
+  ) |> EVAL |> concl |> rhs
+
+  val dotgraph_term = (
+    ``to_dotgraph (^relational_data_term)``
+  ) |> EVAL |> concl |> rhs
+
+  val graph_str = stringSyntax.fromHOLstring dotgraph_term 
+
+  val graph_filename = filename ^ ".dotgraph"
+  val out_stream = TextIO.openOut graph_filename
+  val () = TextIO.output (out_stream, graph_str)
+  val () = TextIO.closeOut out_stream
+
+
+  val table_data_term = (
+    ``mk_table_data (^relational_data_term)``
+  ) (* |> EVAL |> concl |> rhs ---- TODO: figure out problem with early stage evaluation *)
+
+  val (dir_name, just_filename) = (let
+    val path = OS.FileSys.fullPath filename
+    val toks = (String.tokens (fn c => c = #"/") path)
+    val prefix = List.take (toks, (List.length toks) - 1)
+    val dir_name = "/" ^ (String.concatWith "/" prefix)
+    val just_filename = List.last toks
+  in
+    (dir_name, just_filename)
+  end)
+
+
+  val _ = OS.FileSys.chDir dir_name
+
+  val thy_name = (String.translate (fn c =>
+    if c = #"." then
+      "_"
+    else
+      (Char.toString c)
+  ) (just_filename))
+
+
+  (*** NEW THEORY ***)
+  val _ = new_theory thy_name
+
+  val table_data_def = Define `table_data = ^table_data_term`;
+
+  val _ = map (fn hol_def => translate hol_def) common_hol_defs
+  val _ = translate extract_ids_def;
+  val _ = translate mk_power_list_def;
+  val _ = translate LENGTH;
+  val _ = translate find_reachable_edges_def;
+  val _ = translate mk_relational_data_def;
+  val _ = translate mk_table_data_def;
+  val _ = translate table_transition_def;
+  val _ = translate table_data_def;
+
+  val _ = export_theory();
+  (*** EXPORT THEORY ***)
+
+
+  val lib_tm = get_ml_prog_state() |> get_prog
+
+  val main_tm = (process_topdecs `
+    fun main u = (let
+
+      val (state_to_index, (elm_to_idx, (finals, (table, start_idx)))) = table_data
+
+      fun verify_trace (state_idx, trace) = (case trace of
+        [] => state_idx |
+        (elm :: trace') => (let
+          val elm_idx = elm_to_idx elm
+        in
+          verify_trace ((table_transition table state_idx elm_idx), trace')
+        end)
+      )
+
+
+      fun verify_input (state_idx, input) = (let
+        val trace = mk_trace (String.explode input)
+        val state_idx' = verify_trace (state_idx, trace)
+
+        val result_string = 
+          (if (List.nth finals state_idx') then
+            "ACCEPTED"
+          else
+            "REJECTED"
+          )
+        val _ = print (result_string ^ "\n")
+      in
+        state_idx'
+      end)
+
+
+      fun repl state_idx = (let
+        val _ = print "> "
+        val line_op = (TextIO.inputLine TextIO.stdIn)
+        val _ = Option.map (fn line => 
+          repl (verify_input (state_idx, line))
+        ) line_op
+      in
+        ()
+      end) 
+
+      val _ = repl start_idx 
+
+    in 
+      ()
+    end)
+
+  `);
+
+  val call_tm =
+  ``
+    (Dlet unknown_loc (Pcon NONE [])
+      (App Opapp [Var (Short "main"); Con NONE []]))
+  ``
+
+  val prog_tm = ``(^lib_tm ++ ^main_tm ++ [^call_tm])`` |> EVAL |> concl |> rhs
+
+  val _ = write_ast_to_file (filename ^ ".cml.sexp") prog_tm
 
 in
   ()
@@ -499,11 +632,12 @@ fun handleRequest flagMap args = (
     ("smallstep", smallstep),
     ("smallstep_monitor", smallstep_monitor),
     ("dfa_monitor", dfa_monitor),
-    ("dotgraph", dotgraph)
+    ("dotgraph", dotgraph),
+    ("default", default)
   ]
 ) handle 
-   Fail m => print ("failed : " ^ m) |
-   x => (raise x)
+   Fail m => (printHelp (); print ("failed : " ^ m)) |
+   x => (printHelp (); raise x)
 
 
 val argsRef = ref [] 
@@ -531,6 +665,7 @@ fun run () = (let
   val _ =
     case (hasFlag, helpReq, !argsRef) of
       (true, SOME false, args) => handleRequest (!flagMapRef) args |
+      (false, SOME false, args) => handleRequest [("default", true)] args |
       _ => printHelp ()
   
 in
