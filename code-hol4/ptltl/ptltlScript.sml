@@ -3,8 +3,9 @@ open combinTheory pairTheory listTheory stringLib;
 
 val _ = new_theory "ptltl";
 
-Datatype `formula =
-     Eid string
+Datatype:
+ formula
+   = Eid string
    | Prim bool
    | Imp formula formula
    | Equiv formula formula
@@ -17,9 +18,24 @@ Datatype `formula =
    | Prev formula
    | Start formula
    | End formula
-   | Not formula`
-;
+   | Not formula
+End
 
+Definition Trigger_def :
+  Trigger A B <=> Not(Since (Not A) (Not B))
+End
+
+(*---------------------------------------------------------------------------*)
+(* These have to be revisited in light of the R&H semantics below for Prev.  *)
+(*---------------------------------------------------------------------------*)
+
+Definition Yester_def :
+ Yester P <=> Prev P
+End
+
+Definition Zyester_def :
+ Zyester P <=> Prev P
+End
 
 Definition other_elm_def :
  other_elm : string list = []
@@ -56,6 +72,7 @@ Definition bigstep_def :
                          (~NULL trace_prev /\ bigstep (Histor f) trace_prev)))
       | Once f      => (bigstep f trace \/
                         (~NULL trace_prev /\ bigstep (Once f) trace_prev))
+
       | Prev f      => ((NULL trace_prev /\ bigstep f trace) \/ bigstep f trace_prev)
       | Start f     => bigstep f trace /\
                        ~((NULL trace_prev /\ bigstep f trace) \/ bigstep f trace_prev)
@@ -114,7 +131,7 @@ Definition decide_formula_start_def :
       Eid eid     => MEM eid elm
     | Prim b      => b
     | Not f       => ~MEM f st
-    | Imp f1 f2   => (~ MEM f1 st) \/ MEM f2 st
+    | Imp f1 f2   => (~MEM f1 st) \/ MEM f2 st
     | Equiv f1 f2 => (MEM f1 st = MEM f2 st)
     | Or f1 f2    => (MEM f1 st \/ MEM f2 st)
     | Xor f1 f2   => ~(MEM f1 st = MEM f2 st)
@@ -199,13 +216,13 @@ Definition smallstep_def :
 End
 
 Definition  mk_power_list_def :
- (mk_power_list [] = [[]]) /\
- (mk_power_list (x :: xs') =
+ mk_power_list [] = [[]] /\
+ mk_power_list (x :: xs') =
    let
-     rm = (mk_power_list xs');
+     rm = mk_power_list xs';
    in
-     (MAP (\ l . x :: l) rm) ++ rm
- )
+     MAP (\l. x :: l) rm ++ rm
+
 End
 
 Definition extract_ids_def :
