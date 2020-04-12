@@ -1864,19 +1864,6 @@ val list_wellformed_nub_subforms_thm = Q.store_thm (
 (* SCRATCH: *)
 
 
-
-val list_wellformed_subforms_elim_thm = Q.store_thm (
-  "list_wellformed_subforms_thm",
-  (`∀ fs1 fs2 . 
-    list_wellformed fs ==>
-    MEM f fs ==>
-    EVERY (\ f' . MEM f' fs) (mk_subforms f)
-  `),
-  (* TODO *)
-  cheat
-)
-
-
 val list_step_start_FILTER_APPEND_thm = Q.store_thm (
   "list_step_start_FILTER_APPEND_thm",
   (`∀ form fs fs' .
