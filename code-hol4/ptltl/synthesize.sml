@@ -8,11 +8,6 @@ open combinTheory pairTheory listTheory stringLib;
 open ptltlTheory traceTheory
 
 
-
-
-
-
-
 fun main () = (let
 
 val flagMapRef =
@@ -111,6 +106,7 @@ val common_hol_defs =  [
   FST,
   SND,
   FOLDL,
+  FOLDR,
   REVERSE_DEF,
   IN_DEF,
   LIST_TO_SET_DEF,
@@ -134,7 +130,6 @@ val common_hol_defs =  [
   decide_formula_def,
   transition_start_def,
   transition_def,
-  dfa_loop_def,
   mk_elm_def,
   mk_trace_def
 ]
@@ -248,9 +243,13 @@ fun dfa_monitor [filename]  = (let
 
   val top_form_term = (PtltlTree.to_hol_form form)
 
+  val _ = print "ooga 1"
+
   val relational_data_term = (
     ``mk_relational_data (^top_form_term) T``
   ) |> EVAL |> concl |> rhs
+
+  val _ = print "ooga 2"
 
   val table_data_term = (
     ``mk_table_data (^relational_data_term)``
@@ -266,6 +265,7 @@ fun dfa_monitor [filename]  = (let
     (dir_name, just_filename)
   end)
 
+  val _ = print "ooga 4"
 
   val _ = OS.FileSys.chDir dir_name
 
